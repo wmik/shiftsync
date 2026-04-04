@@ -73,6 +73,7 @@ model account {
 
   user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
+  @@unique([provider_id, user_id])
   @@map("account")
 }
 
@@ -89,7 +90,7 @@ model verification {
 
 model location {
   id         String   @id @default(cuid())
-  name       String
+  name       String   @unique
   address    String
   timezone   String
   created_at DateTime @default(now())

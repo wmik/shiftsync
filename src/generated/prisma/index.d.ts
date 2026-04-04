@@ -21243,6 +21243,7 @@ export namespace Prisma {
 
   export type accountWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    provider_id_user_id?: accountProvider_idUser_idCompoundUniqueInput
     AND?: accountWhereInput | accountWhereInput[]
     OR?: accountWhereInput[]
     NOT?: accountWhereInput | accountWhereInput[]
@@ -21259,7 +21260,7 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"account"> | Date | string
     updated_at?: DateTimeFilter<"account"> | Date | string
     user?: XOR<UserScalarRelationFilter, userWhereInput>
-  }, "id">
+  }, "id" | "provider_id_user_id">
 
   export type accountOrderByWithAggregationInput = {
     id?: SortOrder
@@ -21385,10 +21386,10 @@ export namespace Prisma {
 
   export type locationWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    name?: string
     AND?: locationWhereInput | locationWhereInput[]
     OR?: locationWhereInput[]
     NOT?: locationWhereInput | locationWhereInput[]
-    name?: StringFilter<"location"> | string
     address?: StringFilter<"location"> | string
     timezone?: StringFilter<"location"> | string
     created_at?: DateTimeFilter<"location"> | Date | string
@@ -21396,7 +21397,7 @@ export namespace Prisma {
     shifts?: ShiftListRelationFilter
     certifications?: CertificationListRelationFilter
     manager_locations?: Manager_locationListRelationFilter
-  }, "id">
+  }, "id" | "name">
 
   export type locationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -23691,6 +23692,11 @@ export namespace Prisma {
     user_agent?: SortOrder
     user_id?: SortOrder
     impersonated_by?: SortOrder
+  }
+
+  export type accountProvider_idUser_idCompoundUniqueInput = {
+    provider_id: string
+    user_id: string
   }
 
   export type accountCountOrderByAggregateInput = {
