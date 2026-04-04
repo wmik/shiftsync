@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { validateAssignment, suggestAlternatives } from "@/lib/constraints";
+import { createAuditLog } from "@/lib/audit";
 
 export async function POST(
   request: NextRequest,
@@ -84,6 +85,18 @@ export async function POST(
         assigned: {
           select: { id: true, name: true, email: true },
         },
+      },
+    });
+
+    await createAuditLog({
+      entityType: "ASSIGNMENT",
+      entityId: assignment.id,
+      action: "ASSIGN",
+      userId: session.user.id,
+      after: {
+        shiftId: id,
+        userId: userId,
+        userName: user.name,
       },
     });
 

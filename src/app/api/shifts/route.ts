@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { createAuditLog } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   try {
@@ -102,6 +103,21 @@ export async function POST(request: NextRequest) {
         creator: {
           select: { id: true, name: true, email: true },
         },
+      },
+    });
+
+    await createAuditLog({
+      entityType: "SHIFT",
+      entityId: shift.id,
+      action: "CREATE",
+      userId: session.user.id,
+      after: {
+        locationId,
+        skillId,
+        date,
+        startTime,
+        endTime,
+        headcount: shift.headcount,
       },
     });
 
