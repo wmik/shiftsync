@@ -1,8 +1,6 @@
-import { createAuthClient } from "better-auth/client";
+import { createAuthClient } from "better-auth/react";
 import { adminClient } from "better-auth/client/plugins";
 import { ac, shiftSyncAdmin, shiftSyncManager, shiftSyncStaff } from "@/lib/permissions";
-
-export const { signIn, signUp, signOut, useSession } = createAuthClient();
 
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
@@ -17,3 +15,6 @@ export const authClient = createAuthClient({
     }),
   ],
 });
+
+export const { signIn, signUp, signOut } = authClient;
+export const useSession = authClient.useSession;
