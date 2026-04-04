@@ -38,11 +38,23 @@ export interface OvertimeStatus {
   requiresOverride: boolean;
 }
 
-export interface NotificationType {
+export interface Notification {
   id: string;
   user_id: string;
-  type: string;
+  type: NotificationTypeEnum;
   message: string;
   is_read: boolean;
   created_at: Date;
 }
+
+export type NotificationTypeEnum =
+  | "SHIFT_ASSIGNED"
+  | "SHIFT_UNASSIGNED"
+  | "SHIFT_PUBLISHED"
+  | "SHIFT_CANCELLED"
+  | "SWAP_REQUEST"
+  | "SWAP_ACCEPTED"
+  | "SWAP_REJECTED"
+  | "DROP_REQUEST"
+  | "DROP_CLAIMED"
+  | "DROP_EXPIRED";

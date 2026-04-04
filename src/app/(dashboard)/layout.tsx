@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession } from "@/lib/auth-client";
 import {
   Calendar,
   Users,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 const navigation = [
   { name: "Schedule", href: "/schedule", icon: Calendar },
@@ -32,12 +34,20 @@ const adminNavigation = [
 function SidebarContent({ 
   pathname, 
   isAdmin, 
-  onLinkClick 
+  onLinkClick,
+  user,
 }: { 
   pathname: string; 
   isAdmin: boolean;
   onLinkClick?: () => void;
+  user?: { name?: string | null; email?: string };
 }) {
+  const initials = user?.name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase() || "?";
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b">
@@ -95,12 +105,12 @@ function SidebarContent({
 
       <div className="p-4 border-t">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-            <span className="text-sm font-medium">A</span>
+          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+            <span className="text-sm font-medium text-primary-foreground">{initials}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Admin User</p>
-            <p className="text-xs text-muted-foreground truncate">admin@coastaleats.com</p>
+            <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
           </div>
         </div>
         <Link href="/settings">
@@ -127,30 +137,37 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isAdmin = true;
+  const session = useSession();
+
+  const isAdmin = session.data?.user?.role === "admin";
+  const user = session.data?.user;
 
   return (
     <div className="flex h-screen">
       <aside className="hidden lg:flex w-64 flex-col bg-card border-r">
-        <SidebarContent pathname={pathname} isAdmin={isAdmin} />
+        <SidebarContent pathname={pathname} isAdmin={isAdmin} user={user} />
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-64 p-0">
-          <SidebarContent pathname={pathname} isAdmin={isAdmin} onLinkClick={() => setMobileOpen(false)} />
+          <SidebarContent pathname={pathname} isAdmin={isAdmin} user={user} onLinkClick={() => setMobileOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 border-b bg-background z-50 flex items-center px-4">
-        <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
-          <Menu className="h-5 w-5" />
-        </Button>
-        <span className="ml-4 font-semibold">ShiftSync</span>
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 border-b bg-background z-50 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
+            <Menu className="h-5 w-5" />
+          </Button>
+          <span className="ml-2 font-semibold">ShiftSync</span>
+        </div>
+        <NotificationBell />
       </div>
 
-      <main className="flex-1 overflow-auto pt-14 lg:pt-0">
-        <div className="container mx-auto p-6">{children}</div>
-      </main>
+      <div className="flex-1 overflow-auto pt-14 lg:pt-0">
+        <div className="hidden lg:block container mx-auto p-6">{children}</div>
+        <div className="lg:hidden container mx-auto p-4">{children}</div>
+      </div>
     </div>
   );
 }
