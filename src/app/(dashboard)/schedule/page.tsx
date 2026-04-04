@@ -1,11 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useSession } from "@/lib/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, ChevronLeft, ChevronRight, Clock, MapPin } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Eye,
+  EyeOff,
+  User,
+  AlertCircle,
+} from "lucide-react";
 
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const months = [
@@ -13,17 +49,201 @@ const months = [
   "July", "August", "September", "October", "November", "December"
 ];
 
+interface Location {
+  id: string;
+  name: string;
+  timezone: string;
+}
+
+interface Skill {
+  id: string;
+  name: string;
+}
+
+interface ShiftAssignment {
+  id: string;
+  assigned: { id: string; name: string; email: string };
+  status: string;
+}
+
+interface Shift {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  headcount: number;
+  is_published: boolean;
+  cutoff_hours: number;
+  location: Location;
+  skill: Skill;
+  creator: { id: string; name: string; email: string };
+  assignments: ShiftAssignment[];
+  _count?: { assignments: number };
+}
+
 export default function SchedulePage() {
-  const canManage = true;
-  const [currentDate] = useState(new Date());
+  const session = useSession();
+  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isShiftDetailOpen, setIsShiftDetailOpen] = useState(false);
+  const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    locationId: "",
+    skillId: "",
+    date: "",
+    startTime: "09:00",
+    endTime: "17:00",
+    headcount: 1,
+  });
+
+  const canManage = session.data?.user?.role === "admin" || session.data?.user?.role === "manager";
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  
+
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);
   const startingDayOfWeek = firstDayOfMonth.getDay();
   const daysInMonth = lastDayOfMonth.getDate();
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [shiftsRes, locationsRes, skillsRes] = await Promise.all([
+        fetch("/api/shifts"),
+        fetch("/api/locations"),
+        fetch("/api/skills"),
+      ]);
+
+      if (shiftsRes.ok) {
+        setShifts(await shiftsRes.json());
+      }
+      if (locationsRes.ok) {
+        setLocations(await locationsRes.json());
+      }
+      if (skillsRes.ok) {
+        setSkills(await skillsRes.json());
+      }
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchShifts = useCallback(async () => {
+    try {
+      const startDate = firstDayOfMonth.toISOString().split("T")[0];
+      const endDate = lastDayOfMonth.toISOString().split("T")[0];
+      const res = await fetch(`/api/shifts?startDate=${startDate}&endDate=${endDate}`);
+      if (res.ok) {
+        setShifts(await res.json());
+      }
+    } catch (error) {
+      console.error("Failed to fetch shifts:", error);
+    }
+  }, [firstDayOfMonth, lastDayOfMonth]);
+
+  useEffect(() => {
+    fetchShifts();
+  }, [fetchShifts]);
+
+  const navigateMonth = (direction: number) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() + direction);
+    setCurrentDate(newDate);
+  };
+
+  const handleCreateShift = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/shifts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        await fetchShifts();
+        setIsCreateOpen(false);
+        setFormData({
+          locationId: "",
+          skillId: "",
+          date: "",
+          startTime: "09:00",
+          endTime: "17:00",
+          headcount: 1,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to create shift:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublishToggle = async (shift: Shift) => {
+    try {
+      const endpoint = shift.is_published ? "unpublish" : "publish";
+      const res = await fetch(`/api/shifts/${shift.id}/${endpoint}`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        await fetchShifts();
+      }
+    } catch (error) {
+      console.error("Failed to toggle publish:", error);
+    }
+  };
+
+  const handleDeleteShift = async (shiftId: string) => {
+    try {
+      const res = await fetch(`/api/shifts/${shiftId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        await fetchShifts();
+        setSelectedShift(null);
+        setIsShiftDetailOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to delete shift:", error);
+    }
+  };
+
+  const openShiftDetail = (shift: Shift) => {
+    setSelectedShift(shift);
+    setIsShiftDetailOpen(true);
+  };
+
+  const getShiftsForDay = (day: number) => {
+    const dateStr = new Date(year, month, day).toISOString().split("T")[0];
+    return shifts.filter((s) => s.date.split("T")[0] === dateStr);
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return `${weekDays[date.getDay()]} ${date.getDate()}`;
+  };
+
+  const getShiftBadgeColor = (skill: string) => {
+    const colors: Record<string, string> = {
+      Server: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+      Bartender: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+      "Line Cook": "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+      "Grill Cook": "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+      Host: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+      Dishwasher: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300",
+    };
+    return colors[skill] || "bg-primary/10 text-primary";
+  };
 
   const generateCalendarDays = () => {
     const days = [];
@@ -38,6 +258,8 @@ export default function SchedulePage() {
 
   const calendarDays = generateCalendarDays();
 
+  const today = new Date();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -46,7 +268,7 @@ export default function SchedulePage() {
           <p className="text-muted-foreground">Manage and view shifts</p>
         </div>
         {canManage && (
-          <Button>
+          <Button onClick={() => setIsCreateOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Create Shift
           </Button>
@@ -65,15 +287,15 @@ export default function SchedulePage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <Button variant="outline" size="icon" disabled>
+                  <Button variant="outline" size="icon" onClick={() => navigateMonth(-1)}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <CardTitle>{months[month]} {year}</CardTitle>
-                  <Button variant="outline" size="icon" disabled>
+                  <Button variant="outline" size="icon" onClick={() => navigateMonth(1)}>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button variant="outline" onClick={() => window.location.reload()}>
+                <Button variant="outline" onClick={() => setCurrentDate(new Date())}>
                   Today
                 </Button>
               </div>
@@ -85,32 +307,42 @@ export default function SchedulePage() {
                     {day}
                   </div>
                 ))}
-                {calendarDays.map((day, index) => (
-                  <div
-                    key={index}
-                    className={`min-h-[120px] bg-card p-2 ${
-                      day === new Date().getDate() && 
-                      month === new Date().getMonth() && 
-                      year === new Date().getFullYear()
-                        ? "ring-2 ring-primary ring-inset"
-                        : ""
-                    }`}
-                  >
-                    {day && (
-                      <>
-                        <div className="text-sm font-medium mb-1">{day}</div>
-                        <div className="space-y-1">
-                          <div className="text-xs p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded truncate">
-                            6AM-2PM
+                {calendarDays.map((day, index) => {
+                  const dayShifts = day ? getShiftsForDay(day) : [];
+                  const isToday = day === today.getDate() &&
+                    month === today.getMonth() &&
+                    year === today.getFullYear();
+                  return (
+                    <div
+                      key={index}
+                      className={`min-h-[120px] bg-card p-2 ${
+                        isToday ? "ring-2 ring-primary ring-inset" : ""
+                      }`}
+                    >
+                      {day && (
+                        <>
+                          <div className="text-sm font-medium mb-1">{day}</div>
+                          <div className="space-y-1">
+                            {dayShifts.slice(0, 3).map((shift) => (
+                              <div
+                                key={shift.id}
+                                className={`text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 ${getShiftBadgeColor(shift.skill.name)}`}
+                                onClick={() => openShiftDetail(shift)}
+                              >
+                                {shift.start_time}-{shift.end_time}
+                              </div>
+                            ))}
+                            {dayShifts.length > 3 && (
+                              <div className="text-xs text-muted-foreground">
+                                +{dayShifts.length - 3} more
+                              </div>
+                            )}
                           </div>
-                          <div className="text-xs p-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded truncate">
-                            4PM-10PM
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -122,29 +354,54 @@ export default function SchedulePage() {
               <CardTitle>All Shifts</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Clock className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Shift #{i}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          <span>Downtown Location</span>
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              ) : shifts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No shifts found
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {shifts.map((shift) => (
+                    <div
+                      key={shift.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 cursor-pointer"
+                      onClick={() => openShiftDetail(shift)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getShiftBadgeColor(shift.skill.name)}`}>
+                          <Clock className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{formatDate(shift.date)}</p>
+                            <Badge variant="outline">{shift.skill.name}</Badge>
+                            {!shift.is_published && (
+                              <Badge variant="secondary">Draft</Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            <span>{shift.location.name}</span>
+                            <span>&middot;</span>
+                            <Clock className="h-3 w-3" />
+                            <span>{shift.start_time} - {shift.end_time}</span>
+                          </div>
                         </div>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {shift._count?.assignments || 0}/{shift.headcount}
+                        </span>
+                        <Badge variant="secondary">
+                          <User className="h-3 w-3 mr-1" />
+                          Assigned
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium">Today</p>
-                      <p className="text-sm text-muted-foreground">6:00 AM - 2:00 PM</p>
-                    </div>
-                    <Badge variant="secondary">Server</Badge>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -155,13 +412,243 @@ export default function SchedulePage() {
               <CardTitle>My Upcoming Shifts</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                Connect to database to view your shifts
-              </div>
+              {session.data?.user ? (
+                <div className="space-y-4">
+                  {shifts
+                    .filter((shift) =>
+                      shift.assignments.some(
+                        (a) => a.assigned.id === session.data?.user?.id
+                      )
+                    )
+                    .map((shift) => (
+                      <div
+                        key={shift.id}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getShiftBadgeColor(shift.skill.name)}`}>
+                            <Clock className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{formatDate(shift.date)}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {shift.start_time} - {shift.end_time}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm">{shift.location.name}</p>
+                          <Badge variant="outline">{shift.skill.name}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  {shifts.filter((shift) =>
+                    shift.assignments.some(
+                      (a) => a.assigned.id === session.data?.user?.id
+                    )
+                  ).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No upcoming shifts
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  Sign in to view your shifts
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Create New Shift</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <select
+                id="location"
+                value={formData.locationId}
+                onChange={(e) => setFormData({ ...formData, locationId: e.target.value })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select location</option>
+                {locations.map((loc) => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="skill">Skill</Label>
+              <select
+                id="skill"
+                value={formData.skillId}
+                onChange={(e) => setFormData({ ...formData, skillId: e.target.value })}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select skill</option>
+                {skills.map((skill) => (
+                  <option key={skill.id} value={skill.id}>
+                    {skill.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start">Start Time</Label>
+                <Input
+                  id="start"
+                  type="time"
+                  value={formData.startTime}
+                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end">End Time</Label>
+                <Input
+                  id="end"
+                  type="time"
+                  value={formData.endTime}
+                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="headcount">Headcount</Label>
+              <Input
+                id="headcount"
+                type="number"
+                min={1}
+                value={formData.headcount}
+                onChange={(e) => setFormData({ ...formData, headcount: parseInt(e.target.value) || 1 })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateShift}
+              disabled={
+                saving ||
+                !formData.locationId ||
+                !formData.skillId ||
+                !formData.date
+              }
+            >
+              {saving ? "Creating..." : "Create Shift"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isShiftDetailOpen} onOpenChange={setIsShiftDetailOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Shift Details</DialogTitle>
+          </DialogHeader>
+          {selectedShift && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getShiftBadgeColor(selectedShift.skill.name)}`}>
+                    <Clock className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">{formatDate(selectedShift.date)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedShift.start_time} - {selectedShift.end_time}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{selectedShift.skill.name}</Badge>
+                  {!selectedShift.is_published && (
+                    <Badge variant="secondary">Draft</Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedShift.location.name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    {selectedShift._count?.assignments || 0} / {selectedShift.headcount} assigned
+                  </span>
+                </div>
+              </div>
+
+              {selectedShift.assignments.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Assigned Staff</Label>
+                  <div className="space-y-2">
+                    {selectedShift.assignments.map((assignment) => (
+                      <div
+                        key={assignment.id}
+                        className="flex items-center justify-between p-2 border rounded"
+                      >
+                        <span>{assignment.assigned.name}</span>
+                        <Badge variant="secondary">{assignment.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-4 border-t">
+                {canManage && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => handlePublishToggle(selectedShift)}
+                      className="flex-1"
+                    >
+                      {selectedShift.is_published ? (
+                        <>
+                          <EyeOff className="h-4 w-4 mr-2" />
+                          Unpublish
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Publish
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDeleteShift(selectedShift.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
