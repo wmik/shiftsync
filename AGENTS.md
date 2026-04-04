@@ -1,5 +1,129 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# ShiftSync Implementation Guide
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+## Tech Stack
+- **Framework**: Next.js 16 (App Router)
+- **Database**: PostgreSQL with Prisma 7 ORM
+- **Auth**: Better Auth with Admin Plugin
+- **UI**: shadcn/ui + Tailwind CSS
+- **Real-time**: Server-Sent Events
+
+## Project Setup
+
+### 1. Install Dependencies
+```bash
+npm install
+```
+
+### 2. Configure Environment
+```bash
+cp .env.example .env
+# Edit .env with your database URL and secrets
+```
+
+### 3. Generate Prisma Client
+```bash
+npx prisma generate
+```
+
+### 4. Create Database Migrations
+```bash
+npx prisma migrate dev --name init
+```
+
+### 5. Seed Database (optional but recommended)
+```bash
+npx tsx prisma/seed.ts
+```
+
+### 6. Run Development Server
+```bash
+npm run dev
+```
+
+## Demo Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@coastaleats.com | password123 |
+| Manager | manager@coastaleats.com | password123 |
+| Staff | sarah@coastaleats.com | password123 |
+
+## Key Files
+
+### Configuration
+- `prisma/schema.prisma` - Database schema
+- `prisma.config.ts` - Prisma 7 configuration
+- `src/lib/auth.ts` - Better Auth configuration
+- `src/lib/permissions.ts` - Role-based access control
+
+### Constraint Validation
+- `src/lib/constraints/index.ts` - Shift assignment validation engine
+
+### API Routes
+- `src/app/api/auth/[...all]/route.ts` - Better Auth API
+
+## Authentication Flow
+
+1. Users sign in via `/login` using email/password
+2. Better Auth creates a session with user data
+3. Middleware (`src/middleware.ts`) protects routes based on auth state and roles
+4. Admin plugin provides user management endpoints
+
+## Role Hierarchy
+
+```
+ADMIN
+├── Full user management
+├── All locations access
+├── Analytics & audit logs
+└── System configuration
+
+MANAGER
+├── Assigned location management
+├── Shift creation & publishing
+├── Swap/drop approval
+└── Staff oversight
+
+STAFF
+├── View published schedule
+├── Set availability
+├── Request swaps/drops
+└── Pick up available shifts
+```
+
+## Intentional Ambiguities Resolved
+
+1. **Historical data on de-certification**: Records preserved, marked as historical
+2. **Desired hours vs availability**: Desired = goal, availability = hard constraint
+3. **Consecutive days**: Any shift >0 hours counts
+4. **Post-approval shift edit**: Requires new approval
+5. **Timezone boundary**: Use location's primary timezone
+
+## Known Limitations
+
+1. SSE real-time updates not yet implemented
+2. Email notifications simulated (console logging)
+3. No SMS/phone notifications
+4. No mobile-native push notifications
+5. Audit log export is basic CSV only
+
+## Commands
+
+```bash
+# Development
+npm run dev
+
+# Type checking
+npm run typecheck
+
+# Linting
+npm run lint
+
+# Build
+npm run build
+
+# Prisma operations
+npx prisma studio      # Open database GUI
+npx prisma migrate     # Run migrations
+npx prisma generate    # Generate client
+```
