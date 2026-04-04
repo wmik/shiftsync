@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell, Check } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Bell, Check, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useSSE } from "@/hooks/use-sse";
 import type { Notification } from "@/types";
 
 interface NotificationResponse {
@@ -18,11 +18,7 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch("/api/notifications");
       if (res.ok) {
@@ -33,7 +29,25 @@ export function NotificationBell() {
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const handleSSEMessage = useCallback((message: { event: string; data: Record<string, unknown> }) => {
+    if (message.event === "heartbeat" && typeof message.data.unreadCount === "number") {
+      setUnreadCount(message.data.unreadCount as number);
+    }
+    if (message.event === "notification") {
+      fetchNotifications();
+    }
+  }, [fetchNotifications]);
+
+  const { isConnected } = useSSE("/api/sse", {
+    onMessage: handleSSEMessage,
+    enabled: true,
+  });
 
   const markAsRead = async (id: string) => {
     try {
@@ -117,7 +131,16 @@ export function NotificationBell() {
           <Card className="absolute right-0 top-full mt-2 w-80 z-50 shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Notifications</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  Notifications
+                  <span className="relative flex h-2 w-2">
+                    {isConnected ? (
+                      <Wifi className="h-3 w-3 text-green-500" />
+                    ) : (
+                      <WifiOff className="h-3 w-3 text-muted-foreground" />
+                    )}
+                  </span>
+                </CardTitle>
                 {unreadCount > 0 && (
                   <Button
                     variant="ghost"
