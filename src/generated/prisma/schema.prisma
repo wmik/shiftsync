@@ -1,0 +1,265 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model user {
+  id             String    @id
+  name           String
+  email          String    @unique
+  email_verified Boolean   @default(false)
+  image          String?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  role           String    @default("staff")
+  banned         Boolean   @default(false)
+  ban_reason     String?
+  ban_expires    DateTime?
+  timezone       String    @default("America/New_York")
+
+  sessions                session[]
+  accounts                account[]
+  certifications          certification[]
+  availability            availability[]
+  availability_exceptions availability_exception[]
+  shift_assignments       shift_assignment[]       @relation("assigned_user")
+  assignments_made        shift_assignment[]       @relation("assignment_assigner")
+  created_shifts          shift[]
+  swap_requests_made      swap_request[]           @relation("swap_requester")
+  swap_requests_received  swap_request[]           @relation("swap_target")
+  drop_requests           drop_request[]
+  notifications           notification[]
+  audit_logs              audit_log[]
+  manager_locations       manager_location[]
+
+  @@map("user")
+}
+
+model session {
+  id              String   @id
+  expires_at      DateTime
+  token           String   @unique
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  ip_address      String?
+  user_agent      String?
+  user_id         String
+  impersonated_by String?
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model account {
+  id                       String    @id
+  account_id               String
+  provider_id              String
+  user_id                  String
+  access_token             String?
+  refresh_token            String?
+  id_token                 String?
+  access_token_expires_at  DateTime?
+  refresh_token_expires_at DateTime?
+  scope                    String?
+  password                 String?
+  created_at               DateTime  @default(now())
+  updated_at               DateTime  @updatedAt
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model verification {
+  id         String    @id
+  identifier String
+  value      String
+  expires_at DateTime
+  created_at DateTime?
+  updated_at DateTime?
+
+  @@map("verification")
+}
+
+model location {
+  id         String   @id @default(cuid())
+  name       String
+  address    String
+  timezone   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  shifts            shift[]
+  certifications    certification[]
+  manager_locations manager_location[]
+
+  @@map("location")
+}
+
+model skill {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  created_at DateTime @default(now())
+
+  shifts         shift[]
+  certifications certification[]
+
+  @@map("skill")
+}
+
+model certification {
+  id           String   @id @default(cuid())
+  user_id      String
+  location_id  String
+  skill_id     String
+  certified_at DateTime @default(now())
+
+  user     user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location location @relation(fields: [location_id], references: [id], onDelete: Cascade)
+  skill    skill    @relation(fields: [skill_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, location_id, skill_id])
+  @@map("certification")
+}
+
+model availability {
+  id              String    @id @default(cuid())
+  user_id         String
+  day_of_week     Int
+  start_time      String
+  end_time        String
+  effective_from  DateTime?
+  effective_until DateTime?
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("availability")
+}
+
+model availability_exception {
+  id           String   @id @default(cuid())
+  user_id      String
+  date         DateTime @db.Date
+  is_available Boolean
+  reason       String?
+  created_at   DateTime @default(now())
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("availability_exception")
+}
+
+model shift {
+  id           String   @id @default(cuid())
+  location_id  String
+  skill_id     String
+  date         DateTime @db.Date
+  start_time   String
+  end_time     String
+  headcount    Int      @default(1)
+  is_published Boolean  @default(false)
+  cutoff_hours Int      @default(48)
+  created_by   String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  location      location           @relation(fields: [location_id], references: [id])
+  skill         skill              @relation(fields: [skill_id], references: [id])
+  creator       user               @relation(fields: [created_by], references: [id])
+  assignments   shift_assignment[]
+  swap_requests swap_request[]
+  drop_requests drop_request[]
+
+  @@map("shift")
+}
+
+model shift_assignment {
+  id          String   @id @default(cuid())
+  shift_id    String
+  user_id     String
+  assigned_by String
+  status      String   @default("CONFIRMED")
+  assigned_at DateTime @default(now())
+
+  shift    shift @relation(fields: [shift_id], references: [id], onDelete: Cascade)
+  assigned user  @relation("assigned_user", fields: [user_id], references: [id])
+  assigner user  @relation("assignment_assigner", fields: [assigned_by], references: [id])
+
+  @@unique([shift_id, user_id])
+  @@map("shift_assignment")
+}
+
+model swap_request {
+  id                 String   @id @default(cuid())
+  requester_shift_id String
+  requester_user_id  String
+  target_user_id     String
+  status             String   @default("PENDING")
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  shift     shift @relation(fields: [requester_shift_id], references: [id])
+  requester user  @relation("swap_requester", fields: [requester_user_id], references: [id])
+  target    user  @relation("swap_target", fields: [target_user_id], references: [id])
+
+  @@map("swap_request")
+}
+
+model drop_request {
+  id                 String   @id @default(cuid())
+  shift_id           String
+  status             String   @default("OPEN")
+  expires_at         DateTime
+  claimed_by_user_id String?
+  created_at         DateTime @default(now())
+
+  shift      shift @relation(fields: [shift_id], references: [id])
+  claimed_by user? @relation(fields: [claimed_by_user_id], references: [id])
+
+  @@map("drop_request")
+}
+
+model notification {
+  id         String   @id @default(cuid())
+  user_id    String
+  type       String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notification")
+}
+
+model audit_log {
+  id          String   @id @default(cuid())
+  entity_type String
+  entity_id   String
+  action      String
+  user_id     String
+  before      Json?
+  after       Json?
+  created_at  DateTime @default(now())
+
+  user user @relation(fields: [user_id], references: [id])
+
+  @@map("audit_log")
+}
+
+model manager_location {
+  id          String @id @default(cuid())
+  user_id     String
+  location_id String
+
+  user     user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  location location @relation(fields: [location_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, location_id])
+  @@map("manager_location")
+}
