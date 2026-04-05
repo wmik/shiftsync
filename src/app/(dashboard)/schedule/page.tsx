@@ -293,6 +293,29 @@ export default function SchedulePage() {
     }
   };
 
+  const handleUnassignStaff = async (assignmentId: string) => {
+    if (!selectedShift) return;
+    if (!confirm("Are you sure you want to unassign this staff member?")) return;
+    try {
+      const res = await fetch(`/api/shifts/${selectedShift.id}/assign?assignmentId=${assignmentId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        await fetchShifts();
+        const updatedShift = shifts.find((s) => s.id === selectedShift.id);
+        if (updatedShift) {
+          setSelectedShift({ ...updatedShift, assignments: [...updatedShift.assignments] });
+        }
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to unassign staff");
+      }
+    } catch (error) {
+      console.error("Failed to unassign staff:", error);
+      alert("Failed to unassign staff");
+    }
+  };
+
   const handleUpdateShift = async () => {
     if (!selectedShift) return;
     setSaving(true);
@@ -341,6 +364,25 @@ export default function SchedulePage() {
   const getShiftsForDay = (day: number) => {
     const dateStr = new Date(year, month, day).toLocaleDateString("en-CA");
     return shifts.filter((s) => s.date.split("T")[0] === dateStr);
+  };
+
+  const formatViolationMessage = (violation: string) => {
+    if (violation.includes("double") || violation.includes("overlap") || violation.includes("already has")) {
+      return { icon: "📅", text: violation };
+    }
+    if (violation.includes("10 hour") || violation.includes("rest") || violation.includes("between shifts")) {
+      return { icon: "⏰", text: violation };
+    }
+    if (violation.includes("skill") || violation.includes("certification") || violation.includes("certified")) {
+      return { icon: "🎓", text: violation };
+    }
+    if (violation.includes("availability") || violation.includes("available")) {
+      return { icon: "📅", text: violation };
+    }
+    if (violation.includes("overtime") || violation.includes("hour")) {
+      return { icon: "⚠️", text: violation };
+    }
+    return { icon: "⚠️", text: violation };
   };
 
   const formatDate = (dateStr: string) => {
@@ -897,8 +939,20 @@ export default function SchedulePage() {
                             key={assignment.id}
                             className="flex items-center justify-between p-2 border rounded"
                           >
-                            <span>{assignment.assigned.name}</span>
-                            <Badge variant="secondary">{assignment.status}</Badge>
+                            <div className="flex items-center gap-2">
+                              <span>{assignment.assigned.name}</span>
+                              <Badge variant="secondary">{assignment.status}</Badge>
+                            </div>
+                            {canManage && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleUnassignStaff(assignment.id)}
+                                className="text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -950,7 +1004,17 @@ export default function SchedulePage() {
                             ))}
                           </select>
                           {assignmentError && (
-                            <p className="text-sm text-red-500">{assignmentError}</p>
+                            <div className="space-y-1 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-md p-2">
+                              {assignmentError.split(", ").map((violation, idx) => {
+                                const { text } = formatViolationMessage(violation.trim());
+                                return (
+                                  <div key={idx} className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400">
+                                    <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                    <span>{text}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           )}
                           <Button
                             onClick={handleAssignStaff}

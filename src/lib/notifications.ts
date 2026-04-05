@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { emitNotification } from "./notification-events";
 
 export type NotificationType =
   | "SHIFT_ASSIGNED"
@@ -37,6 +38,13 @@ export async function createNotification({
     });
 
     console.log(`[Notification] ${type} for user ${userId}: ${message}`);
+
+    emitNotification(userId, {
+      id: notification.id,
+      type: notification.type,
+      message: notification.message,
+    });
+
     return notification;
   } catch (error) {
     console.error("Failed to create notification:", error);

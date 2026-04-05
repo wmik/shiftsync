@@ -67,6 +67,9 @@ export default function SettingsPage() {
     password: "",
   });
   const [saving, setSaving] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ current: "", new: "", confirm: "" });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
   const isAdmin = session.data?.user?.role === "admin";
 
@@ -118,6 +121,41 @@ export default function SettingsPage() {
   const resetForm = () => {
     setFormData({ name: "", email: "", password: "" });
     setSelectedLocations([]);
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordForm.new !== passwordForm.confirm) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+    if (passwordForm.new.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      return;
+    }
+    setSaving(true);
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    try {
+      const res = await fetch(`/api/users/${session.data?.user?.id}/password`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: passwordForm.current,
+          newPassword: passwordForm.new,
+        }),
+      });
+      if (res.ok) {
+        setPasswordSuccess("Password updated successfully");
+        setPasswordForm({ current: "", new: "", confirm: "" });
+      } else {
+        const data = await res.json();
+        setPasswordError(data.error || "Failed to update password");
+      }
+    } catch {
+      setPasswordError("Failed to update password");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCreateUser = async (role: string) => {
@@ -306,6 +344,57 @@ export default function SettingsPage() {
                   {getRoleBadge(session.data?.user?.role || "staff")}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Change Password</CardTitle>
+              <CardDescription>Update your password</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input
+                  id="current-password"
+                  type="password"
+                  value={passwordForm.current}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                  placeholder="Enter current password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={passwordForm.new}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                  placeholder="Enter new password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={passwordForm.confirm}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                  placeholder="Confirm new password"
+                />
+              </div>
+              {passwordError && (
+                <p className="text-sm text-red-500">{passwordError}</p>
+              )}
+              {passwordSuccess && (
+                <p className="text-sm text-green-600">{passwordSuccess}</p>
+              )}
+              <Button
+                onClick={handleChangePassword}
+                disabled={saving || !passwordForm.current || !passwordForm.new || !passwordForm.confirm}
+              >
+                {saving ? "Updating..." : "Update Password"}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

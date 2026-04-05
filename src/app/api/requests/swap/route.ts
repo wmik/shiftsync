@@ -24,13 +24,26 @@ export async function GET(request: NextRequest) {
     }
 
     if (locationId) {
-      where = {
-        ...where,
-        shift: { location_id: locationId },
-      };
+      where.shift = { location_id: locationId };
     }
 
-    if (userRole !== "admin") {
+    if (userRole === "admin") {
+    } else if (userRole === "manager") {
+      const managerLocations = await prisma.manager_location.findMany({
+        where: { user_id: userId },
+        select: { location_id: true },
+      });
+      const locationIds = managerLocations.map((ml) => ml.location_id);
+
+      where = {
+        ...where,
+        OR: [
+          { requester_user_id: userId },
+          { target_user_id: userId },
+          ...(locationIds.length > 0 ? [{ shift: { location_id: { in: locationIds } } }] : []),
+        ],
+      };
+    } else {
       where = {
         ...where,
         OR: [
