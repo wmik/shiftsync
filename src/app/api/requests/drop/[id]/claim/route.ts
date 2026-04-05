@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { validateAssignment, suggestAlternatives } from "@/lib/constraints";
+import type { ConstraintViolation } from "@/types";
 import { createNotification, NOTIFICATION_MESSAGES } from "@/lib/notifications";
 
 export async function PUT(
@@ -92,7 +93,7 @@ export async function PUT(
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      const violations = await validateAssignment(
+      const result = await validateAssignment(
         session.user.id,
         dropRequest.shift.location_id,
         dropRequest.shift.skill_id,
@@ -102,11 +103,11 @@ export async function PUT(
         dropRequest.shift_id
       );
 
-      if (violations.length > 0) {
+      if (result.violations.length > 0) {
         return NextResponse.json(
           {
             error: "Assignment validation failed",
-            violations: violations.map((v) => v.message),
+            violations: result.violations.map((v: ConstraintViolation) => v.message),
           },
           { status: 400 }
         );
