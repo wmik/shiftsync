@@ -11,7 +11,7 @@ import {
   ArrowLeftRight,
   BarChart3,
   Settings,
-  UserCog,
+  FileClock,
   LogOut,
   Menu,
 } from "lucide-react";
@@ -28,7 +28,7 @@ const navigation = [
 ];
 
 const adminNavigation = [
-  { name: "User Management", href: "/admin", icon: UserCog },
+  { name: "Activity", href: "/admin", icon: FileClock },
 ];
 
 function SidebarContent({ 

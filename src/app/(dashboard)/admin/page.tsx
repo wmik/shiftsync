@@ -130,7 +130,6 @@ export default function AdminPage() {
       <Tabs defaultValue="audit" className="space-y-4">
         <TabsList>
           <TabsTrigger value="audit">Audit Log</TabsTrigger>
-          <TabsTrigger value="users">All Users</TabsTrigger>
           <TabsTrigger value="roles">Roles</TabsTrigger>
         </TabsList>
 
@@ -221,28 +220,6 @@ export default function AdminPage() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>All Users</CardTitle>
-                  <CardDescription>Connect database to view users</CardDescription>
-                </div>
-                <Button>
-                  <UserCog className="h-4 w-4 mr-2" />
-                  Add User
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                No users found
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
