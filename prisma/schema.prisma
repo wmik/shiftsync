@@ -21,6 +21,7 @@ model user {
   ban_reason     String?
   ban_expires    DateTime?
   timezone       String    @default("America/New_York")
+  preferences    Json?     @default("{ \"emailNotifications\": true }")
 
   sessions                session[]
   accounts                account[]

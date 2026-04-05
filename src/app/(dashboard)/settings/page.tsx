@@ -24,6 +24,8 @@ import {
   Shield,
   Trash2,
   MapPin,
+  Bell,
+  Mail,
 } from "lucide-react";
 
 interface Location {
@@ -38,11 +40,6 @@ interface User {
   role: string;
   createdAt: string;
   managerLocations?: { id: string; name: string }[];
-}
-
-interface ManagerLocation {
-  id: string;
-  name: string;
 }
 
 export default function SettingsPage() {
@@ -70,6 +67,7 @@ export default function SettingsPage() {
   const [passwordForm, setPasswordForm] = useState({ current: "", new: "", confirm: "" });
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [emailNotifications, setEmailNotifications] = useState(true);
 
   const isAdmin = session.data?.user?.role === "admin";
 
@@ -77,9 +75,9 @@ export default function SettingsPage() {
     if (isAdmin) {
       fetchUsers();
       fetchLocations();
-    } else {
-      setLoading(false);
     }
+    fetchPreferences();
+    setLoading(false);
   }, [isAdmin]);
 
   const fetchUsers = async () => {
@@ -108,6 +106,18 @@ export default function SettingsPage() {
     }
   };
 
+  const fetchPreferences = async () => {
+    try {
+      const res = await fetch(`/api/users/${session.data?.user?.id}/preferences`);
+      if (res.ok) {
+        const data = await res.json();
+        setEmailNotifications(data.preferences?.emailNotifications ?? true);
+      }
+    } catch (err) {
+      console.error("Failed to fetch preferences:", err);
+    }
+  };
+
   const showSuccess = (message: string) => {
     setSuccess(message);
     setTimeout(() => setSuccess(null), 3000);
@@ -116,6 +126,25 @@ export default function SettingsPage() {
   const showError = (message: string) => {
     setError(message);
     setTimeout(() => setError(null), 5000);
+  };
+
+  const handleToggleEmailNotifications = async (enabled: boolean) => {
+    try {
+      const res = await fetch(`/api/users/${session.data?.user?.id}/preferences`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailNotifications: enabled }),
+      });
+      if (res.ok) {
+        setEmailNotifications(enabled);
+        showSuccess(`Email notifications ${enabled ? "enabled" : "disabled"}`);
+      } else {
+        const data = await res.json();
+        showError(data.error || "Failed to update preferences");
+      }
+    } catch {
+      showError("Failed to update preferences");
+    }
   };
 
   const resetForm = () => {
@@ -182,7 +211,7 @@ export default function SettingsPage() {
         const data = await res.json();
         showError(data.error || "Failed to create user");
       }
-    } catch (err) {
+    } catch {
       showError("Failed to create user");
     } finally {
       setSaving(false);
@@ -200,7 +229,7 @@ export default function SettingsPage() {
         const data = await res.json();
         showError(data.error || "Failed to delete user");
       }
-    } catch (err) {
+    } catch {
       showError("Failed to delete user");
     }
   };
@@ -221,7 +250,7 @@ export default function SettingsPage() {
         const data = await res.json();
         showError(data.error || "Failed to update role");
       }
-    } catch (err) {
+    } catch {
       showError("Failed to update role");
     }
   };
@@ -258,7 +287,7 @@ export default function SettingsPage() {
       setIsAssignLocationsOpen(false);
       setSelectedUser(null);
       await fetchUsers();
-    } catch (err) {
+    } catch {
       showError("Failed to update locations");
     } finally {
       setSaving(false);
@@ -395,6 +424,46 @@ export default function SettingsPage() {
               >
                 {saving ? "Updating..." : "Update Password"}
               </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Notification Preferences
+              </CardTitle>
+              <CardDescription>Manage how you receive notifications</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Email Notifications</p>
+                    <p className="text-sm text-muted-foreground">
+                      Receive email updates for shift changes and requests
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={emailNotifications}
+                  onClick={() => handleToggleEmailNotifications(!emailNotifications)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                    emailNotifications ? "bg-primary" : "bg-muted"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform ${
+                      emailNotifications ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
