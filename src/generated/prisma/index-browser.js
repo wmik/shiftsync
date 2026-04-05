@@ -132,7 +132,8 @@ exports.Prisma.UserScalarFieldEnum = {
   banned: 'banned',
   ban_reason: 'ban_reason',
   ban_expires: 'ban_expires',
-  timezone: 'timezone'
+  timezone: 'timezone',
+  preferences: 'preferences'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {
@@ -298,15 +299,15 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
-exports.Prisma.NullsOrder = {
-  first: 'first',
-  last: 'last'
-};
-
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 
 

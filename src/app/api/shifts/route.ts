@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
     const isPublished = searchParams.get("isPublished");
+    const active = searchParams.get("active");
 
     const where: Record<string, unknown> = {};
 
@@ -57,6 +58,20 @@ export async function GET(request: NextRequest) {
       },
       orderBy: [{ date: "asc" }, { start_time: "asc" }],
     });
+
+    if (active === "true") {
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const currentDateStr = now.toISOString().split("T")[0];
+      
+      const activeShifts = shifts.filter((shift) => {
+        const shiftDateStr = new Date(shift.date).toISOString().split("T")[0];
+        if (shiftDateStr !== currentDateStr) return false;
+        return shift.start_time <= currentTime && shift.end_time >= currentTime;
+      });
+      
+      return NextResponse.json(activeShifts);
+    }
 
     return NextResponse.json(shifts);
   } catch (error) {

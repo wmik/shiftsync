@@ -17,7 +17,7 @@ export async function POST(
 
     const { id } = await params;
     const body = await request.json();
-    const { userId } = body;
+    const { userId, shiftUpdatedAt, overrideReason } = body;
 
     if (!userId) {
       return NextResponse.json({ error: "User ID is required" }, { status: 400 });
@@ -38,6 +38,21 @@ export async function POST(
       return NextResponse.json({ error: "Shift not found" }, { status: 404 });
     }
 
+    if (shiftUpdatedAt) {
+      const clientTimestamp = new Date(shiftUpdatedAt).getTime();
+      const serverTimestamp = shift.updated_at.getTime();
+      if (serverTimestamp > clientTimestamp) {
+        return NextResponse.json(
+          {
+            error: "CONFLICT",
+            message: "This shift has been modified by another user. Please refresh and try again.",
+            currentAssignments: shift.assignments.map((a) => a.user_id),
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -46,14 +61,15 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const violations = await validateAssignment(
+    const { violations, hasSeventhDayOverride } = await validateAssignment(
       userId,
       shift.location_id,
       shift.skill_id,
       shift.date,
       shift.start_time,
       shift.end_time,
-      id
+      id,
+      overrideReason
     );
 
     if (violations.length > 0) {
@@ -69,6 +85,7 @@ export async function POST(
           error: "Assignment validation failed",
           violations: violations.map((v) => v.message),
           suggestions: alternatives,
+          requiresOverride: violations.some((v) => v.type === "CONSECUTIVE_DAYS" && v.message.includes("7th")),
         },
         { status: 400 }
       );

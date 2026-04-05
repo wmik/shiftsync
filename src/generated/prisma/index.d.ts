@@ -2569,6 +2569,7 @@ export namespace Prisma {
     ban_reason: number
     ban_expires: number
     timezone: number
+    preferences: number
     _all: number
   }
 
@@ -2616,6 +2617,7 @@ export namespace Prisma {
     ban_reason?: true
     ban_expires?: true
     timezone?: true
+    preferences?: true
     _all?: true
   }
 
@@ -2704,6 +2706,7 @@ export namespace Prisma {
     ban_reason: string | null
     ban_expires: Date | null
     timezone: string
+    preferences: JsonValue | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -2736,6 +2739,7 @@ export namespace Prisma {
     ban_reason?: boolean
     ban_expires?: boolean
     timezone?: boolean
+    preferences?: boolean
     sessions?: boolean | user$sessionsArgs<ExtArgs>
     accounts?: boolean | user$accountsArgs<ExtArgs>
     certifications?: boolean | user$certificationsArgs<ExtArgs>
@@ -2766,6 +2770,7 @@ export namespace Prisma {
     ban_reason?: boolean
     ban_expires?: boolean
     timezone?: boolean
+    preferences?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type userSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2781,6 +2786,7 @@ export namespace Prisma {
     ban_reason?: boolean
     ban_expires?: boolean
     timezone?: boolean
+    preferences?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type userSelectScalar = {
@@ -2796,9 +2802,10 @@ export namespace Prisma {
     ban_reason?: boolean
     ban_expires?: boolean
     timezone?: boolean
+    preferences?: boolean
   }
 
-  export type userOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "email_verified" | "image" | "created_at" | "updated_at" | "role" | "banned" | "ban_reason" | "ban_expires" | "timezone", ExtArgs["result"]["user"]>
+  export type userOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "email_verified" | "image" | "created_at" | "updated_at" | "role" | "banned" | "ban_reason" | "ban_expires" | "timezone" | "preferences", ExtArgs["result"]["user"]>
   export type userInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | user$sessionsArgs<ExtArgs>
     accounts?: boolean | user$accountsArgs<ExtArgs>
@@ -2850,6 +2857,7 @@ export namespace Prisma {
       ban_reason: string | null
       ban_expires: Date | null
       timezone: string
+      preferences: Prisma.JsonValue | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -3299,6 +3307,7 @@ export namespace Prisma {
     readonly ban_reason: FieldRef<"user", 'String'>
     readonly ban_expires: FieldRef<"user", 'DateTime'>
     readonly timezone: FieldRef<"user", 'String'>
+    readonly preferences: FieldRef<"user", 'Json'>
   }
     
 
@@ -20675,7 +20684,8 @@ export namespace Prisma {
     banned: 'banned',
     ban_reason: 'ban_reason',
     ban_expires: 'ban_expires',
-    timezone: 'timezone'
+    timezone: 'timezone',
+    preferences: 'preferences'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -20898,14 +20908,6 @@ export namespace Prisma {
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-  export const NullsOrder: {
-    first: 'first',
-    last: 'last'
-  };
-
-  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
   export const JsonNullValueFilter: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull,
@@ -20913,6 +20915,14 @@ export namespace Prisma {
   };
 
   export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
   /**
@@ -20956,20 +20966,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Int'
-   */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-  /**
-   * Reference to a field of type 'Int[]'
-   */
-  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -20980,6 +20976,20 @@ export namespace Prisma {
    * Reference to a field of type 'QueryMode'
    */
   export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -21016,6 +21026,7 @@ export namespace Prisma {
     ban_reason?: StringNullableFilter<"user"> | string | null
     ban_expires?: DateTimeNullableFilter<"user"> | Date | string | null
     timezone?: StringFilter<"user"> | string
+    preferences?: JsonNullableFilter<"user">
     sessions?: SessionListRelationFilter
     accounts?: AccountListRelationFilter
     certifications?: CertificationListRelationFilter
@@ -21045,6 +21056,7 @@ export namespace Prisma {
     ban_reason?: SortOrderInput | SortOrder
     ban_expires?: SortOrderInput | SortOrder
     timezone?: SortOrder
+    preferences?: SortOrderInput | SortOrder
     sessions?: sessionOrderByRelationAggregateInput
     accounts?: accountOrderByRelationAggregateInput
     certifications?: certificationOrderByRelationAggregateInput
@@ -21077,6 +21089,7 @@ export namespace Prisma {
     ban_reason?: StringNullableFilter<"user"> | string | null
     ban_expires?: DateTimeNullableFilter<"user"> | Date | string | null
     timezone?: StringFilter<"user"> | string
+    preferences?: JsonNullableFilter<"user">
     sessions?: SessionListRelationFilter
     accounts?: AccountListRelationFilter
     certifications?: CertificationListRelationFilter
@@ -21106,6 +21119,7 @@ export namespace Prisma {
     ban_reason?: SortOrderInput | SortOrder
     ban_expires?: SortOrderInput | SortOrder
     timezone?: SortOrder
+    preferences?: SortOrderInput | SortOrder
     _count?: userCountOrderByAggregateInput
     _max?: userMaxOrderByAggregateInput
     _min?: userMinOrderByAggregateInput
@@ -21127,6 +21141,7 @@ export namespace Prisma {
     ban_reason?: StringNullableWithAggregatesFilter<"user"> | string | null
     ban_expires?: DateTimeNullableWithAggregatesFilter<"user"> | Date | string | null
     timezone?: StringWithAggregatesFilter<"user"> | string
+    preferences?: JsonNullableWithAggregatesFilter<"user">
   }
 
   export type sessionWhereInput = {
@@ -22160,6 +22175,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -22189,6 +22205,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -22218,6 +22235,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -22247,6 +22265,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -22276,6 +22295,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type userUpdateManyMutationInput = {
@@ -22291,6 +22311,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type userUncheckedUpdateManyInput = {
@@ -22306,6 +22327,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type sessionCreateInput = {
@@ -23410,6 +23432,29 @@ export namespace Prisma {
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type SessionListRelationFilter = {
     every?: sessionWhereInput
@@ -23549,6 +23594,7 @@ export namespace Prisma {
     ban_reason?: SortOrder
     ban_expires?: SortOrder
     timezone?: SortOrder
+    preferences?: SortOrder
   }
 
   export type userMaxOrderByAggregateInput = {
@@ -23651,6 +23697,32 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type UserScalarRelationFilter = {
@@ -24131,29 +24203,6 @@ export namespace Prisma {
     is_read?: SortOrder
     created_at?: SortOrder
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type audit_logCountOrderByAggregateInput = {
     id?: SortOrder
@@ -24182,32 +24231,6 @@ export namespace Prisma {
     action?: SortOrder
     user_id?: SortOrder
     created_at?: SortOrder
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type manager_locationUser_idLocation_idCompoundUniqueInput = {
@@ -25641,6 +25664,29 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
@@ -25667,29 +25713,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type sessionCreateWithoutUserInput = {
@@ -26493,6 +26516,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
     availability?: availabilityCreateNestedManyWithoutUserInput
@@ -26521,6 +26545,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
     availability?: availabilityUncheckedCreateNestedManyWithoutUserInput
@@ -26565,6 +26590,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
     availability?: availabilityUpdateManyWithoutUserNestedInput
@@ -26593,6 +26619,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
     availability?: availabilityUncheckedUpdateManyWithoutUserNestedInput
@@ -26621,6 +26648,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
     availability?: availabilityCreateNestedManyWithoutUserInput
@@ -26649,6 +26677,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
     availability?: availabilityUncheckedCreateNestedManyWithoutUserInput
@@ -26693,6 +26722,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
     availability?: availabilityUpdateManyWithoutUserNestedInput
@@ -26721,6 +26751,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
     availability?: availabilityUncheckedUpdateManyWithoutUserNestedInput
@@ -26985,6 +27016,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     availability?: availabilityCreateNestedManyWithoutUserInput
@@ -27013,6 +27045,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     availability?: availabilityUncheckedCreateNestedManyWithoutUserInput
@@ -27103,6 +27136,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     availability?: availabilityUpdateManyWithoutUserNestedInput
@@ -27131,6 +27165,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     availability?: availabilityUncheckedUpdateManyWithoutUserNestedInput
@@ -27217,6 +27252,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -27245,6 +27281,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -27289,6 +27326,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -27317,6 +27355,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -27345,6 +27384,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -27373,6 +27413,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -27417,6 +27458,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -27445,6 +27487,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -27519,6 +27562,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -27547,6 +27591,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -27729,6 +27774,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -27757,6 +27803,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -27872,6 +27919,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -27900,6 +27948,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -27933,6 +27982,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -27961,6 +28011,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -28050,6 +28101,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -28078,6 +28130,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -28117,6 +28170,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -28145,6 +28199,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -28212,6 +28267,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -28240,6 +28296,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -28273,6 +28330,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -28301,6 +28359,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -28390,6 +28449,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -28418,6 +28478,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -28457,6 +28518,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -28485,6 +28547,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -28552,6 +28615,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -28580,6 +28644,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -28669,6 +28734,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -28697,6 +28763,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -28725,6 +28792,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -28753,6 +28821,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -28797,6 +28866,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -28825,6 +28895,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -28853,6 +28924,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -28881,6 +28953,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -28925,6 +28998,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -28953,6 +29027,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
@@ -28981,6 +29056,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionCreateNestedManyWithoutUserInput
     accounts?: accountCreateNestedManyWithoutUserInput
     certifications?: certificationCreateNestedManyWithoutUserInput
@@ -29009,6 +29085,7 @@ export namespace Prisma {
     ban_reason?: string | null
     ban_expires?: Date | string | null
     timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: accountUncheckedCreateNestedManyWithoutUserInput
     certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
@@ -29080,6 +29157,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUpdateManyWithoutUserNestedInput
     accounts?: accountUpdateManyWithoutUserNestedInput
     certifications?: certificationUpdateManyWithoutUserNestedInput
@@ -29108,6 +29186,7 @@ export namespace Prisma {
     ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
     ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
     sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
     certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
