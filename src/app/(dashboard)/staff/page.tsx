@@ -297,7 +297,7 @@ export default function StaffPage() {
       )}
 
       <Sheet open={!!selectedStaff} onOpenChange={(open) => !open && setSelectedStaff(null)}>
-        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto px-4">
           <SheetHeader>
             <SheetTitle>
               {selectedStaff?.name}
