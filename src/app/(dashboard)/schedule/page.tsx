@@ -390,6 +390,15 @@ export default function SchedulePage() {
     return `${weekDays[date.getDay()]} ${date.getDate()}`;
   };
 
+  const isOvernightShift = (startTime: string, endTime: string): boolean => {
+    return startTime > endTime;
+  };
+
+  const formatShiftTime = (startTime: string, endTime: string): string => {
+    const overnight = isOvernightShift(startTime, endTime);
+    return `${startTime}-${endTime}${overnight ? "+" : ""}`;
+  };
+
   const getShiftBadgeColor = (skill: string) => {
     const colors: Record<string, string> = {
       Server: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
@@ -576,7 +585,7 @@ export default function SchedulePage() {
                                 className={`text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 ${getShiftBadgeColor(shift.skill.name)}`}
                                 onClick={() => openShiftDetail(shift)}
                               >
-                                {shift.start_time}-{shift.end_time}
+                                {formatShiftTime(shift.start_time, shift.end_time)}
                               </div>
                             ))}
                             {dayShifts.length > 3 && (
@@ -632,7 +641,7 @@ export default function SchedulePage() {
                             <span>{shift.location.name}</span>
                             <span>&middot;</span>
                             <Clock className="h-3 w-3" />
-                            <span>{shift.start_time} - {shift.end_time}</span>
+                            <span>{formatShiftTime(shift.start_time, shift.end_time)}</span>
                           </div>
                         </div>
                       </div>
@@ -679,7 +688,7 @@ export default function SchedulePage() {
                           <div>
                             <p className="font-medium">{formatDate(shift.date)}</p>
                             <p className="text-sm text-muted-foreground">
-                              {shift.start_time} - {shift.end_time}
+                              {formatShiftTime(shift.start_time, shift.end_time)}
                             </p>
                           </div>
                         </div>
@@ -905,7 +914,7 @@ export default function SchedulePage() {
                       <div>
                         <p className="font-semibold">{formatDate(selectedShift.date)}</p>
                         <p className="text-sm text-muted-foreground">
-                          {selectedShift.start_time} - {selectedShift.end_time}
+                          {formatShiftTime(selectedShift.start_time, selectedShift.end_time)}
                         </p>
                       </div>
                     </div>
@@ -1081,7 +1090,7 @@ export default function SchedulePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{formatDate(selectedShift.date)} {selectedShift.start_time} - {selectedShift.end_time}</span>
+                  <span>{formatDate(selectedShift.date)} {formatShiftTime(selectedShift.start_time, selectedShift.end_time)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">{selectedShift.skill.name}</Badge>
@@ -1126,7 +1135,7 @@ export default function SchedulePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{formatDate(selectedShift.date)} {selectedShift.start_time} - {selectedShift.end_time}</span>
+                  <span>{formatDate(selectedShift.date)} {formatShiftTime(selectedShift.start_time, selectedShift.end_time)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">{selectedShift.skill.name}</Badge>

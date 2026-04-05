@@ -302,16 +302,16 @@ export async function suggestAlternatives(
   const alternatives: AlternativeStaff[] = [];
 
   for (const user of users) {
-    const violations = await validateAssignment(user.id, locationId, skillId, date, startTime, endTime);
+    const { violations } = await validateAssignment(user.id, locationId, skillId, date, startTime, endTime);
     const noConflicts = violations.filter(
-      (v) => !["DOUBLE_BOOKING", "REST_PERIOD", "OVERTIME_DAILY", "CONSECUTIVE_DAYS"].includes(v.type)
+      (v: ConstraintViolation) => !["DOUBLE_BOOKING", "REST_PERIOD", "OVERTIME_DAILY", "CONSECUTIVE_DAYS"].includes(v.type)
     );
 
     if (noConflicts.length === 0) {
       let reason = "Available";
-      if (violations.some((v) => v.type === "AVAILABILITY")) {
+      if (violations.some((v: ConstraintViolation) => v.type === "AVAILABILITY")) {
         reason = "Has availability set";
-      } else if (violations.some((v) => v.type === "OVERTIME_WEEKLY")) {
+      } else if (violations.some((v: ConstraintViolation) => v.type === "OVERTIME_WEEKLY")) {
         reason = "Approaching overtime";
       } else {
         reason = "All constraints met";
@@ -334,9 +334,11 @@ export async function validateAssignment(
   date: Date,
   startTime: string,
   endTime: string,
-  excludeShiftId?: string
-): Promise<ConstraintViolation[]> {
+  excludeShiftId?: string,
+  overrideReason?: string
+): Promise<{ violations: ConstraintViolation[]; hasSeventhDayOverride: boolean }> {
   const violations: ConstraintViolation[] = [];
+  let hasSeventhDayOverride = false;
 
   const doubleBooking = await checkNoDoubleBooking(userId, date, startTime, endTime, excludeShiftId);
   if (doubleBooking) violations.push(doubleBooking);
@@ -373,13 +375,21 @@ export async function validateAssignment(
     });
   }
   if (overtime.isSeventhDay) {
-    violations.push({
-      type: "CONSECUTIVE_DAYS",
-      message: "Would be 7th consecutive day worked (requires override)",
-    });
+    if (overrideReason && overrideReason.length >= 5) {
+      hasSeventhDayOverride = true;
+      violations.push({
+        type: "CONSECUTIVE_DAYS",
+        message: `7th consecutive day - override applied: ${overrideReason}`,
+      });
+    } else {
+      violations.push({
+        type: "CONSECUTIVE_DAYS",
+        message: "Would be 7th consecutive day worked (requires manager override with documented reason)",
+      });
+    }
   }
 
-  return violations;
+  return { violations, hasSeventhDayOverride };
 }
 
 function timesOverlap(start1: string, end1: string, start2: string, end2: string): boolean {
@@ -410,6 +420,20 @@ function isTimeWithinRange(
   availStart: string,
   availEnd: string
 ): boolean {
+  const isOvernightShift = shiftStart > shiftEnd;
+  const isOvernightAvailability = availStart > availEnd;
+
+  if (isOvernightShift) {
+    if (isOvernightAvailability) {
+      return shiftStart >= availStart || shiftEnd <= availEnd;
+    }
+    return false;
+  }
+
+  if (isOvernightAvailability) {
+    return false;
+  }
+
   return shiftStart >= availStart && shiftEnd <= availEnd;
 }
 
