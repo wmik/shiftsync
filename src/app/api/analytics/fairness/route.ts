@@ -6,7 +6,7 @@ function getHoursBetween(start: string, end: string): number {
   const [startH, startM] = start.split(":").map(Number);
   const [endH, endM] = end.split(":").map(Number);
   let hours = endH - startH;
-  let minutes = endM - startM;
+  const minutes = endM - startM;
   if (hours < 0) hours += 24;
   return hours + minutes / 60;
 }

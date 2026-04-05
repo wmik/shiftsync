@@ -16,31 +16,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Plus,
   ChevronLeft,
   ChevronRight,
   Clock,
   MapPin,
-  MoreVertical,
-  Pencil,
   Trash2,
   Eye,
   EyeOff,
   User,
-  AlertCircle,
 } from "lucide-react";
 
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

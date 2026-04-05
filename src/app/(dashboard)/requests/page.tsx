@@ -127,11 +127,6 @@ export default function RequestsPage() {
     return `${weekDays[date.getDay()]} ${date.getMonth() + 1}/${date.getDate()}`;
   };
 
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
   const formatExpires = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();

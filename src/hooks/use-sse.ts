@@ -20,99 +20,112 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const optionsRef = useRef(options);
+  const urlRef = useRef(url);
 
-  const connect = useCallback(() => {
-    if (!enabled || eventSourceRef.current) return;
+  useEffect(() => {
+    optionsRef.current = options;
+    urlRef.current = url;
+  }, [options, url]);
 
-    try {
-      const eventSource = new EventSource(url);
-      eventSourceRef.current = eventSource;
+  useEffect(() => {
+    if (!enabled) return;
 
-      eventSource.onopen = () => {
-        setIsConnected(true);
-        onConnect?.();
-      };
+    const connectFn = () => {
+      if (!enabled || eventSourceRef.current) return;
 
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          onMessage?.({ event: "message", data });
-        } catch (error) {
-          console.error("Failed to parse SSE message:", error);
-        }
-      };
+      try {
+        const eventSource = new EventSource(urlRef.current);
+        eventSourceRef.current = eventSource;
 
-      eventSource.addEventListener("connected", (event) => {
-        try {
-          const data = JSON.parse((event as MessageEvent).data);
-          onMessage?.({ event: "connected", data });
-        } catch (error) {
-          console.error("Failed to parse connected event:", error);
-        }
-      });
+        eventSource.onopen = () => {
+          setIsConnected(true);
+          optionsRef.current.onConnect?.();
+        };
 
-      eventSource.addEventListener("heartbeat", (event) => {
-        try {
-          const data = JSON.parse((event as MessageEvent).data);
-          onMessage?.({ event: "heartbeat", data });
-        } catch (error) {
-          console.error("Failed to parse heartbeat event:", error);
-        }
-      });
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            optionsRef.current.onMessage?.({ event: "message", data });
+          } catch (error) {
+            console.error("Failed to parse SSE message:", error);
+          }
+        };
 
-      eventSource.addEventListener("notification", (event) => {
-        try {
-          const data = JSON.parse((event as MessageEvent).data);
-          onMessage?.({ event: "notification", data });
-        } catch (error) {
-          console.error("Failed to parse notification event:", error);
-        }
-      });
+        eventSource.addEventListener("connected", (event) => {
+          try {
+            const data = JSON.parse((event as MessageEvent).data);
+            optionsRef.current.onMessage?.({ event: "connected", data });
+          } catch (error) {
+            console.error("Failed to parse connected event:", error);
+          }
+        });
 
-      eventSource.onerror = (error) => {
-        console.error("SSE error:", error);
-        onError?.(new Error("SSE connection error"));
-        setIsConnected(false);
-        eventSource.close();
+        eventSource.addEventListener("heartbeat", (event) => {
+          try {
+            const data = JSON.parse((event as MessageEvent).data);
+            optionsRef.current.onMessage?.({ event: "heartbeat", data });
+          } catch (error) {
+            console.error("Failed to parse heartbeat event:", error);
+          }
+        });
+
+        eventSource.addEventListener("notification", (event) => {
+          try {
+            const data = JSON.parse((event as MessageEvent).data);
+            optionsRef.current.onMessage?.({ event: "notification", data });
+          } catch (error) {
+            console.error("Failed to parse notification event:", error);
+          }
+        });
+
+        eventSource.onerror = (error) => {
+          console.error("SSE error:", error);
+          optionsRef.current.onError?.(new Error("SSE connection error"));
+          setIsConnected(false);
+          eventSource.close();
+          eventSourceRef.current = null;
+
+          reconnectTimeoutRef.current = setTimeout(() => {
+            connectFn();
+          }, 5000);
+        };
+      } catch (error) {
+        optionsRef.current.onError?.(error as Error);
+      }
+    };
+
+    const disconnectFn = () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
         eventSourceRef.current = null;
+      }
 
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connect();
-        }, 5000);
-      };
-    } catch (error) {
-      onError?.(error as Error);
-    }
-  }, [url, enabled, onMessage, onConnect, onError]);
+      setIsConnected(false);
+      optionsRef.current.onDisconnect?.();
+    };
 
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
+    connectFn();
 
+    return () => {
+      disconnectFn();
+    };
+  }, [enabled]);
+
+  const reconnect = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
-
-    setIsConnected(false);
-    onDisconnect?.();
-  }, [onDisconnect]);
-
-  useEffect(() => {
-    if (enabled) {
-      connect();
-    }
-
-    return () => {
-      disconnect();
-    };
-  }, [enabled, connect, disconnect]);
+  }, []);
 
   return {
     isConnected,
-    reconnect: connect,
-    disconnect,
+    reconnect,
   };
 }
