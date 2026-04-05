@@ -101,11 +101,10 @@ STAFF
 
 ## Known Limitations
 
-1. SSE real-time updates not yet implemented
-2. Email notifications simulated (console logging)
-3. No SMS/phone notifications
-4. No mobile-native push notifications
-5. Audit log export is basic CSV only
+1. Email notifications simulated (console logging)
+2. No SMS/phone notifications
+3. No mobile-native push notifications
+4. Audit log export is basic CSV only
 
 ## Commands
 
@@ -126,4 +125,26 @@ npm run build
 npx prisma studio      # Open database GUI
 npx prisma migrate     # Run migrations
 npx prisma generate    # Generate client
+npx prisma migrate reset --force  # Reset database (dev only)
+npx tsx prisma/seed.ts  # Seed database with demo data
 ```
+
+## Key Features Implemented
+
+### Constraint Validation
+- **Double Booking**: Prevents assigning staff to overlapping shifts
+- **Rest Period**: Enforces 10-hour minimum rest between shifts
+- **Skill Match**: Verifies staff has required skill certification
+- **Location Certification**: Checks staff is certified for the location
+- **Availability**: Validates against user's weekly availability
+- **Overtime Limits**: Daily (12hr) and weekly (40hr) limits
+- **Consecutive Days**: Warns on 6th day, blocks 7th unless manager override
+
+### Override System
+- 7th consecutive day requires manager override with documented reason (min 5 chars)
+- Override reason is stored and visible in shift history
+
+### Overnight Shifts
+- Shifts where start_time > end_time are supported
+- Displayed with "+" suffix to indicate next-day end
+- Availability checking handles overnight availability windows
