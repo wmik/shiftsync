@@ -105,14 +105,17 @@ function SidebarContent({
       </nav>
 
       <div className="p-4 border-t">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-sm font-medium text-primary-foreground">{initials}</span>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-medium text-primary-foreground">{initials}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
-          </div>
+          <NotificationBell />
         </div>
         <Link href="/settings">
           <Button variant="outline" className="w-full justify-start gap-2">

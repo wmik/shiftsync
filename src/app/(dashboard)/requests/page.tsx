@@ -211,7 +211,6 @@ export default function RequestsPage() {
     (r) => r.claimed_by?.id === userId
   );
   const openDropRequests = dropRequests.filter((r) => r.status === "OPEN");
-  const pendingApprovalSwaps = swapRequests.filter((r) => r.status === "PENDING_APPROVAL");
 
   return (
     <div className="space-y-6">
@@ -255,8 +254,18 @@ export default function RequestsPage() {
         </Card>
       )}
 
-      <Tabs defaultValue="swap" className="space-y-4">
+      <Tabs defaultValue={isManager || isAdmin ? "swap-all" : "swap-my"} className="space-y-4">
         <TabsList>
+          {(isManager || isAdmin) && (
+            <TabsTrigger value="swap-all">
+              All Swap Requests
+              {swapRequests.filter((r) => r.status === "PENDING_APPROVAL").length > 0 && (
+                <Badge className="ml-2 bg-amber-500">
+                  {swapRequests.filter((r) => r.status === "PENDING_APPROVAL").length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="swap-my">
             My Swap Requests
             {mySwapRequests.filter((r) => r.status === "PENDING").length > 0 && (
@@ -265,16 +274,6 @@ export default function RequestsPage() {
               </Badge>
             )}
           </TabsTrigger>
-          {(isManager || isAdmin) && (
-            <TabsTrigger value="swap-approval">
-              Pending Approvals
-              {pendingApprovalSwaps.length > 0 && (
-                <Badge className="ml-2 bg-amber-500">
-                  {pendingApprovalSwaps.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          )}
           <TabsTrigger value="drop">
             Drop Requests
             {openDropRequests.length > 0 && (
@@ -284,6 +283,108 @@ export default function RequestsPage() {
             )}
           </TabsTrigger>
         </TabsList>
+
+        {(isManager || isAdmin) && (
+          <TabsContent value="swap-all">
+            {loading ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Loading...
+                </CardContent>
+              </Card>
+            ) : swapRequests.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No swap requests
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {swapRequests.map((request) => (
+                  <Card key={request.id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                            request.status === "PENDING_APPROVAL" 
+                              ? "bg-amber-100 dark:bg-amber-900/30" 
+                              : "bg-primary/10"
+                          }`}>
+                            <ArrowLeftRight className={`h-6 w-6 ${
+                              request.status === "PENDING_APPROVAL" 
+                                ? "text-amber-600 dark:text-amber-400" 
+                                : "text-primary"
+                            }`} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              {getSwapStatusBadge(request.status)}
+                              <span className="text-sm text-muted-foreground">
+                                {formatDate(request.created_at)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              <span>{request.shift.location.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <Clock className="h-3 w-3 text-muted-foreground" />
+                              <span>
+                                {formatDate(request.shift.date)} {request.shift.start_time} -{" "}
+                                {request.shift.end_time}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 mt-2 text-sm">
+                              <div className="flex items-center gap-1">
+                                <User className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-muted-foreground">From:</span>
+                                <span>{request.requester.name}</span>
+                                {request.requester.id === userId && (
+                                  <Badge variant="outline" className="ml-1">You</Badge>
+                                )}
+                              </div>
+                              {request.target && (
+                                <div className="flex items-center gap-1">
+                                  <User className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-muted-foreground">To:</span>
+                                  <span>{request.target.name}</span>
+                                  {request.target.id === userId && (
+                                    <Badge variant="outline" className="ml-1">You</Badge>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {request.status === "PENDING_APPROVAL" && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleSwapAction(request.id, "APPROVE")}
+                              disabled={actionLoading === request.id}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleSwapAction(request.id, "DENY")}
+                              disabled={actionLoading === request.id}
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Deny
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        )}
 
         <TabsContent value="swap-my">
           {loading ? (
@@ -425,92 +526,6 @@ export default function RequestsPage() {
             </div>
           )}
         </TabsContent>
-
-        {(isManager || isAdmin) && (
-          <TabsContent value="swap-approval">
-            {loading ? (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Loading...
-                </CardContent>
-              </Card>
-            ) : pendingApprovalSwaps.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No pending approvals
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {pendingApprovalSwaps.map((request) => (
-                  <Card key={request.id} className="border-amber-200 dark:border-amber-800">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                            <ArrowLeftRight className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              {getSwapStatusBadge(request.status)}
-                              <span className="text-sm text-muted-foreground">
-                                {formatDate(request.created_at)}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <MapPin className="h-3 w-3 text-muted-foreground" />
-                              <span>{request.shift.location.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <Clock className="h-3 w-3 text-muted-foreground" />
-                              <span>
-                                {formatDate(request.shift.date)} {request.shift.start_time} -{" "}
-                                {request.shift.end_time}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-4 mt-2 text-sm">
-                              <div className="flex items-center gap-1">
-                                <User className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-muted-foreground">From:</span>
-                                <span>{request.requester.name}</span>
-                              </div>
-                              {request.target && (
-                                <div className="flex items-center gap-1">
-                                  <User className="h-3 w-3 text-muted-foreground" />
-                                  <span className="text-muted-foreground">To:</span>
-                                  <span>{request.target.name}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleSwapAction(request.id, "APPROVE")}
-                            disabled={actionLoading === request.id}
-                          >
-                            <Check className="h-4 w-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleSwapAction(request.id, "DENY")}
-                            disabled={actionLoading === request.id}
-                          >
-                            <X className="h-4 w-4 mr-1" />
-                            Deny
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        )}
 
         <TabsContent value="drop">
           {loading ? (

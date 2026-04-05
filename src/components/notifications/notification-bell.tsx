@@ -128,7 +128,7 @@ export function NotificationBell() {
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <Card className="absolute right-0 top-full mt-2 w-80 z-50 shadow-lg">
+          <Card className="absolute right-full sm:left-full sm:-top-24 ml-2 w-80 z-50 shadow-lg">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg flex items-center gap-2">
