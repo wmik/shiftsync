@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${quicksand.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${quicksand.variable} ${geistMono.variable} h-full antialiased ${quicksand.className}`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
