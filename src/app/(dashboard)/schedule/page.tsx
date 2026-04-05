@@ -88,6 +88,15 @@ export default function SchedulePage() {
   const [selectedStaffId, setSelectedStaffId] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [assignmentError, setAssignmentError] = useState("");
+  const [isEditingShift, setIsEditingShift] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    locationId: "",
+    skillId: "",
+    date: "",
+    startTime: "09:00",
+    endTime: "17:00",
+    headcount: 1,
+  });
   const [formData, setFormData] = useState({
     locationId: "",
     skillId: "",
@@ -272,6 +281,51 @@ export default function SchedulePage() {
     } finally {
       setAssigning(false);
     }
+  };
+
+  const handleUpdateShift = async () => {
+    if (!selectedShift) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/shifts/${selectedShift.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData),
+      });
+      if (res.ok) {
+        await fetchShifts();
+        const updated = await res.json();
+        setSelectedShift({
+          ...selectedShift,
+          ...updated,
+          location: updated.location,
+          skill: updated.skill,
+        });
+        setIsEditingShift(false);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update shift");
+      }
+    } catch (error) {
+      console.error("Failed to update shift:", error);
+      alert("Failed to update shift");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startEditingShift = () => {
+    if (!selectedShift) return;
+    const dateStr = selectedShift.date.split("T")[0];
+    setEditFormData({
+      locationId: selectedShift.location.id,
+      skillId: selectedShift.skill.id,
+      date: dateStr,
+      startTime: selectedShift.start_time,
+      endTime: selectedShift.end_time,
+      headcount: selectedShift.headcount,
+    });
+    setIsEditingShift(true);
   };
 
   const getShiftsForDay = (day: number) => {
@@ -613,106 +667,195 @@ export default function SchedulePage() {
       <Dialog open={isShiftDetailOpen} onOpenChange={setIsShiftDetailOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Shift Details</DialogTitle>
+            <DialogTitle>{isEditingShift ? "Edit Shift" : "Shift Details"}</DialogTitle>
           </DialogHeader>
           {selectedShift && (
             <div className="space-y-4 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getShiftBadgeColor(selectedShift.skill.name)}`}>
-                    <Clock className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">{formatDate(selectedShift.date)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedShift.start_time} - {selectedShift.end_time}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">{selectedShift.skill.name}</Badge>
-                  {!selectedShift.is_published && (
-                    <Badge variant="secondary">Draft</Badge>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedShift.location.name}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <span>
-                    {selectedShift._count?.assignments || 0} / {selectedShift.headcount} assigned
-                  </span>
-                </div>
-              </div>
-
-              {selectedShift.assignments.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Assigned Staff</Label>
+              {isEditingShift ? (
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    {selectedShift.assignments.map((assignment) => (
-                      <div
-                        key={assignment.id}
-                        className="flex items-center justify-between p-2 border rounded"
-                      >
-                        <span>{assignment.assigned.name}</span>
-                        <Badge variant="secondary">{assignment.status}</Badge>
-                      </div>
-                    ))}
+                    <Label htmlFor="edit-location">Location</Label>
+                    <select
+                      id="edit-location"
+                      value={editFormData.locationId}
+                      onChange={(e) => setEditFormData({ ...editFormData, locationId: e.target.value })}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="">Select location</option>
+                      {locations.map((loc) => (
+                        <option key={loc.id} value={loc.id}>
+                          {loc.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-skill">Skill</Label>
+                    <select
+                      id="edit-skill"
+                      value={editFormData.skillId}
+                      onChange={(e) => setEditFormData({ ...editFormData, skillId: e.target.value })}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="">Select skill</option>
+                      {skills.map((skill) => (
+                        <option key={skill.id} value={skill.id}>
+                          {skill.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-date">Date</Label>
+                    <Input
+                      id="edit-date"
+                      type="date"
+                      value={editFormData.date}
+                      onChange={(e) => setEditFormData({ ...editFormData, date: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-start">Start Time</Label>
+                      <Input
+                        id="edit-start"
+                        type="time"
+                        value={editFormData.startTime}
+                        onChange={(e) => setEditFormData({ ...editFormData, startTime: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-end">End Time</Label>
+                      <Input
+                        id="edit-end"
+                        type="time"
+                        value={editFormData.endTime}
+                        onChange={(e) => setEditFormData({ ...editFormData, endTime: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-headcount">Headcount</Label>
+                    <Input
+                      id="edit-headcount"
+                      type="number"
+                      min={1}
+                      value={editFormData.headcount}
+                      onChange={(e) => setEditFormData({ ...editFormData, headcount: parseInt(e.target.value) || 1 })}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setIsEditingShift(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleUpdateShift} disabled={saving || !editFormData.locationId || !editFormData.skillId || !editFormData.date} className="flex-1">
+                      {saving ? "Saving..." : "Save Changes"}
+                    </Button>
                   </div>
                 </div>
-              )}
-
-              {canManage && (
-                <div className="space-y-2 pt-2 border-t">
-                  <Label>Assign Staff</Label>
-                  {loadingStaff ? (
-                    <p className="text-sm text-muted-foreground">Loading staff...</p>
-                  ) : availableStaff.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      {(selectedShift._count?.assignments || 0) >= selectedShift.headcount
-                        ? "Shift is fully staffed"
-                        : "No eligible staff available for this shift"}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      <select
-                        value={selectedStaffId}
-                        onChange={(e) => {
-                          setSelectedStaffId(e.target.value);
-                          setAssignmentError("");
-                        }}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      >
-                        <option value="">Select staff member</option>
-                        {availableStaff.map((staff) => (
-                          <option key={staff.id} value={staff.id}>
-                            {staff.name} ({staff.email})
-                          </option>
-                        ))}
-                      </select>
-                      {assignmentError && (
-                        <p className="text-sm text-red-500">{assignmentError}</p>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getShiftBadgeColor(selectedShift.skill.name)}`}>
+                        <Clock className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <p className="font-semibold">{formatDate(selectedShift.date)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedShift.start_time} - {selectedShift.end_time}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{selectedShift.skill.name}</Badge>
+                      {!selectedShift.is_published && (
+                        <Badge variant="secondary">Draft</Badge>
                       )}
-                      <Button
-                        onClick={handleAssignStaff}
-                        disabled={!selectedStaffId || assigning}
-                        className="w-full"
-                      >
-                        {assigning ? "Assigning..." : "Assign Staff"}
-                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span>{selectedShift.location.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span>
+                        {selectedShift._count?.assignments || 0} / {selectedShift.headcount} assigned
+                      </span>
+                    </div>
+                  </div>
+
+                  {selectedShift.assignments.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Assigned Staff</Label>
+                      <div className="space-y-2">
+                        {selectedShift.assignments.map((assignment) => (
+                          <div
+                            key={assignment.id}
+                            className="flex items-center justify-between p-2 border rounded"
+                          >
+                            <span>{assignment.assigned.name}</span>
+                            <Badge variant="secondary">{assignment.status}</Badge>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
-                </div>
+
+                  {canManage && (
+                    <div className="space-y-2 pt-2 border-t">
+                      <Label>Assign Staff</Label>
+                      {loadingStaff ? (
+                        <p className="text-sm text-muted-foreground">Loading staff...</p>
+                      ) : availableStaff.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          {(selectedShift._count?.assignments || 0) >= selectedShift.headcount
+                            ? "Shift is fully staffed"
+                            : "No eligible staff available for this shift"}
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          <select
+                            value={selectedStaffId}
+                            onChange={(e) => {
+                              setSelectedStaffId(e.target.value);
+                              setAssignmentError("");
+                            }}
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          >
+                            <option value="">Select staff member</option>
+                            {availableStaff.map((staff) => (
+                              <option key={staff.id} value={staff.id}>
+                                {staff.name} ({staff.email})
+                              </option>
+                            ))}
+                          </select>
+                          {assignmentError && (
+                            <p className="text-sm text-red-500">{assignmentError}</p>
+                          )}
+                          <Button
+                            onClick={handleAssignStaff}
+                            disabled={!selectedStaffId || assigning}
+                            className="w-full"
+                          >
+                            {assigning ? "Assigning..." : "Assign Staff"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="flex gap-2 pt-4 border-t">
-                {canManage && (
+                {canManage && !isEditingShift && (
                   <>
+                    <Button variant="outline" onClick={startEditingShift} className="flex-1">
+                      Edit
+                    </Button>
                     <Button
                       variant="outline"
                       onClick={() => handlePublishToggle(selectedShift)}
