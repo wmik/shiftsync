@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,13 @@ interface Shift {
   _count?: { assignments: number };
 }
 
+interface StaffMember {
+  id: string;
+  name: string;
+  email: string;
+  certifications: Array<{ skill: { id: string; name: string }; location: { id: string; name: string } }>;
+}
+
 export default function SchedulePage() {
   const session = useSession();
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -76,6 +83,11 @@ export default function SchedulePage() {
   const [isShiftDetailOpen, setIsShiftDetailOpen] = useState(false);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [saving, setSaving] = useState(false);
+  const [availableStaff, setAvailableStaff] = useState<StaffMember[]>([]);
+  const [loadingStaff, setLoadingStaff] = useState(false);
+  const [selectedStaffId, setSelectedStaffId] = useState("");
+  const [assigning, setAssigning] = useState(false);
+  const [assignmentError, setAssignmentError] = useState("");
   const [formData, setFormData] = useState({
     locationId: "",
     skillId: "",
@@ -90,8 +102,8 @@ export default function SchedulePage() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
+  const firstDayOfMonth = useMemo(() => new Date(year, month, 1), [year, month]);
+  const lastDayOfMonth = useMemo(() => new Date(year, month + 1, 0), [year, month]);
   const startingDayOfWeek = firstDayOfMonth.getDay();
   const daysInMonth = lastDayOfMonth.getDate();
 
@@ -202,13 +214,68 @@ export default function SchedulePage() {
     }
   };
 
-  const openShiftDetail = (shift: Shift) => {
+  const openShiftDetail = async (shift: Shift) => {
     setSelectedShift(shift);
+    setSelectedStaffId("");
+    setAssignmentError("");
     setIsShiftDetailOpen(true);
+    if (canManage && shift.location && shift.skill) {
+      setLoadingStaff(true);
+      try {
+        const params = new URLSearchParams();
+        params.set("locationId", shift.location.id);
+        params.set("skillId", shift.skill.id);
+        const res = await fetch(`/api/staff?${params}`);
+        if (res.ok) {
+          const staff = await res.json();
+          const assignedUserIds = shift.assignments.map((a) => a.assigned.id);
+          const unassigned = staff.filter(
+            (s: StaffMember) => !assignedUserIds.includes(s.id)
+          );
+          setAvailableStaff(unassigned);
+        }
+      } catch (error) {
+        console.error("Failed to fetch staff:", error);
+      } finally {
+        setLoadingStaff(false);
+      }
+    }
+  };
+
+  const handleAssignStaff = async () => {
+    if (!selectedShift || !selectedStaffId) return;
+    setAssigning(true);
+    setAssignmentError("");
+    try {
+      const res = await fetch(`/api/shifts/${selectedShift.id}/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedStaffId }),
+      });
+      if (res.ok) {
+        setSelectedStaffId("");
+        await fetchShifts();
+        const updatedShift = shifts.find((s) => s.id === selectedShift.id);
+        if (updatedShift) {
+          setSelectedShift({ ...updatedShift, assignments: [...updatedShift.assignments] });
+        }
+      } else {
+        const data = await res.json();
+        setAssignmentError(data.error || "Failed to assign staff");
+        if (data.violations) {
+          setAssignmentError(data.violations.join(", "));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to assign staff:", error);
+      setAssignmentError("Failed to assign staff");
+    } finally {
+      setAssigning(false);
+    }
   };
 
   const getShiftsForDay = (day: number) => {
-    const dateStr = new Date(year, month, day).toISOString().split("T")[0];
+    const dateStr = new Date(year, month, day).toLocaleDateString("en-CA");
     return shifts.filter((s) => s.date.split("T")[0] === dateStr);
   };
 
@@ -597,6 +664,49 @@ export default function SchedulePage() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {canManage && (
+                <div className="space-y-2 pt-2 border-t">
+                  <Label>Assign Staff</Label>
+                  {loadingStaff ? (
+                    <p className="text-sm text-muted-foreground">Loading staff...</p>
+                  ) : availableStaff.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      {(selectedShift._count?.assignments || 0) >= selectedShift.headcount
+                        ? "Shift is fully staffed"
+                        : "No eligible staff available for this shift"}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      <select
+                        value={selectedStaffId}
+                        onChange={(e) => {
+                          setSelectedStaffId(e.target.value);
+                          setAssignmentError("");
+                        }}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="">Select staff member</option>
+                        {availableStaff.map((staff) => (
+                          <option key={staff.id} value={staff.id}>
+                            {staff.name} ({staff.email})
+                          </option>
+                        ))}
+                      </select>
+                      {assignmentError && (
+                        <p className="text-sm text-red-500">{assignmentError}</p>
+                      )}
+                      <Button
+                        onClick={handleAssignStaff}
+                        disabled={!selectedStaffId || assigning}
+                        className="w-full"
+                      >
+                        {assigning ? "Assigning..." : "Assign Staff"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 
