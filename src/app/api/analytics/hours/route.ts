@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { checkOvertime } from "@/lib/constraints";
 
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
@@ -29,6 +30,24 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("userId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    const whatIf = searchParams.get("whatIf");
+
+    let whatIfShift = null;
+    if (whatIf) {
+      try {
+        const [whatIfUserId, whatIfStartTime, whatIfEndTime, whatIfDate] = whatIf.split(",");
+        if (whatIfUserId && whatIfStartTime && whatIfEndTime && whatIfDate) {
+          whatIfShift = {
+            userId: whatIfUserId,
+            startTime: whatIfStartTime,
+            endTime: whatIfEndTime,
+            date: new Date(whatIfDate),
+          };
+        }
+      } catch {
+        console.warn("Invalid whatIf parameter");
+      }
+    }
 
     const dateFilter: Record<string, unknown> = {};
     if (startDate) {
@@ -44,6 +63,8 @@ export async function GET(request: NextRequest) {
 
     if (userId) {
       where.user_id = userId;
+    } else if (whatIfShift) {
+      where.user_id = whatIfShift.userId;
     }
 
     if (Object.keys(dateFilter).length > 0) {
@@ -71,16 +92,19 @@ export async function GET(request: NextRequest) {
     const hoursByWeek: Record<string, number> = {};
     const hoursByDay: Record<string, number> = {};
 
+    let whatIfResult = null;
+    const whatIfUserName = whatIfShift ? (assignments[0]?.assigned.name || "Unknown") : null;
+
     for (const assignment of assignments) {
       const shift = assignment.shift;
       const hours = getHoursBetween(shift.start_time, shift.end_time);
 
-      const userId = assignment.assigned.id;
-      if (!hoursByUser[userId]) {
-        hoursByUser[userId] = { name: assignment.assigned.name, hours: 0, shifts: 0 };
+      const uid = assignment.assigned.id;
+      if (!hoursByUser[uid]) {
+        hoursByUser[uid] = { name: assignment.assigned.name, hours: 0, shifts: 0 };
       }
-      hoursByUser[userId].hours += hours;
-      hoursByUser[userId].shifts += 1;
+      hoursByUser[uid].hours += hours;
+      hoursByUser[uid].shifts += 1;
 
       const locationId = shift.location.id;
       if (!hoursByLocation[locationId]) {
@@ -108,7 +132,16 @@ export async function GET(request: NextRequest) {
       hoursByDay[dayKey] += hours;
     }
 
-    return NextResponse.json({
+    if (whatIfShift) {
+      whatIfResult = await checkOvertime(
+        whatIfShift.userId,
+        whatIfShift.date,
+        whatIfShift.startTime,
+        whatIfShift.endTime
+      );
+    }
+
+    const response: Record<string, unknown> = {
       totalHours: Object.values(hoursByUser).reduce((sum, u) => sum + u.hours, 0),
       totalShifts: assignments.length,
       byUser: Object.entries(hoursByUser)
@@ -126,7 +159,36 @@ export async function GET(request: NextRequest) {
       byDay: Object.entries(hoursByDay)
         .map(([day, hours]) => ({ day, hours }))
         .sort((a, b) => a.day.localeCompare(b.day)),
-    });
+    };
+
+    if (whatIfResult && whatIfUserName) {
+      response.whatIf = {
+        userId: whatIfShift!.userId,
+        userName: whatIfUserName,
+        shift: {
+          date: whatIfShift!.date.toISOString().split("T")[0],
+          startTime: whatIfShift!.startTime,
+          endTime: whatIfShift!.endTime,
+        },
+        projected: {
+          weeklyHours: whatIfResult.weeklyHours,
+          dailyHours: whatIfResult.dailyHours,
+          consecutiveDays: whatIfResult.consecutiveDays,
+          isOverWeekly: whatIfResult.isOverWeekly,
+          isOverDaily: whatIfResult.isOverDaily,
+          isSixthDay: whatIfResult.isSixthDay,
+          isSeventhDay: whatIfResult.isSeventhDay,
+        },
+        warnings: [
+          whatIfResult.isOverWeekly && `Would exceed 40-hour weekly limit (${whatIfResult.weeklyHours.toFixed(1)} hours)`,
+          whatIfResult.isOverDaily && `Would exceed 12-hour daily limit (${whatIfResult.dailyHours.toFixed(1)} hours)`,
+          whatIfResult.isSixthDay && "Would be 6th consecutive day worked (warning)",
+          whatIfResult.isSeventhDay && "Would be 7th consecutive day worked (requires override)",
+        ].filter(Boolean),
+      };
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Failed to fetch hours analytics:", error);
     return NextResponse.json(
