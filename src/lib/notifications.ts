@@ -8,6 +8,9 @@ export type NotificationType =
   | "SWAP_REQUEST"
   | "SWAP_ACCEPTED"
   | "SWAP_REJECTED"
+  | "SWAP_PENDING_APPROVAL"
+  | "SWAP_APPROVED"
+  | "SWAP_DENIED"
   | "DROP_REQUEST"
   | "DROP_CLAIMED"
   | "DROP_EXPIRED";
@@ -107,6 +110,12 @@ export const NOTIFICATION_MESSAGES = {
     `Your swap request was accepted: ${shiftDetails}`,
   SWAP_REJECTED: (shiftDetails: string) =>
     `Your swap request was rejected: ${shiftDetails}`,
+  SWAP_PENDING_APPROVAL: (shiftDetails: string) =>
+    `Swap request needs manager approval: ${shiftDetails}`,
+  SWAP_APPROVED: (shiftDetails: string) =>
+    `Your swap request was approved: ${shiftDetails}`,
+  SWAP_DENIED: (shiftDetails: string) =>
+    `Your swap request was denied: ${shiftDetails}`,
   DROP_REQUEST: (fromName: string, shiftDetails: string) =>
     `${fromName} dropped a shift: ${shiftDetails}`,
   DROP_CLAIMED: (shiftDetails: string) =>

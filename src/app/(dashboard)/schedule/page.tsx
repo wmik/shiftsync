@@ -25,6 +25,8 @@ import {
   Eye,
   EyeOff,
   User,
+  ArrowLeftRight,
+  AlertTriangle,
 } from "lucide-react";
 
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -105,6 +107,14 @@ export default function SchedulePage() {
     endTime: "17:00",
     headcount: 1,
   });
+  const [isDropOpen, setIsDropOpen] = useState(false);
+  const [dropping, setDropping] = useState(false);
+  const [isSwapOpen, setIsSwapOpen] = useState(false);
+  const [swapping, setSwapping] = useState(false);
+  const [swapTargetId, setSwapTargetId] = useState("");
+  const [availableSwapTargets, setAvailableSwapTargets] = useState<StaffMember[]>([]);
+  const [loadingSwapTargets, setLoadingSwapTargets] = useState(false);
+  const [requestError, setRequestError] = useState("");
 
   const canManage = session.data?.user?.role === "admin" || session.data?.user?.role === "manager";
 
@@ -348,6 +358,96 @@ export default function SchedulePage() {
       Dishwasher: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300",
     };
     return colors[skill] || "bg-primary/10 text-primary";
+  };
+
+  const isUserAssignedToShift = (shift: Shift): boolean => {
+    return shift.assignments.some((a) => a.assigned.id === session.data?.user?.id);
+  };
+
+  const openDropDialog = () => {
+    setRequestError("");
+    setIsDropOpen(true);
+  };
+
+  const handleDropShift = async () => {
+    if (!selectedShift) return;
+    setDropping(true);
+    setRequestError("");
+    try {
+      const res = await fetch("/api/requests/drop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shiftId: selectedShift.id }),
+      });
+      if (res.ok) {
+        setIsDropOpen(false);
+        setSelectedShift(null);
+        setIsShiftDetailOpen(false);
+        await fetchShifts();
+      } else {
+        const data = await res.json();
+        setRequestError(data.error || "Failed to create drop request");
+      }
+    } catch (error) {
+      console.error("Failed to drop shift:", error);
+      setRequestError("Failed to create drop request");
+    } finally {
+      setDropping(false);
+    }
+  };
+
+  const openSwapDialog = async () => {
+    if (!selectedShift) return;
+    setRequestError("");
+    setSwapTargetId("");
+    setIsSwapOpen(true);
+    setLoadingSwapTargets(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("locationId", selectedShift.location.id);
+      params.set("skillId", selectedShift.skill.id);
+      const res = await fetch(`/api/staff?${params}`);
+      if (res.ok) {
+        const staff = await res.json();
+        const assignedUserIds = selectedShift.assignments.map((a) => a.assigned.id);
+        const others = staff.filter(
+          (s: StaffMember) => !assignedUserIds.includes(s.id) && s.id !== session.data?.user?.id
+        );
+        setAvailableSwapTargets(others);
+      }
+    } catch (error) {
+      console.error("Failed to fetch swap targets:", error);
+      setRequestError("Failed to load swap targets");
+    } finally {
+      setLoadingSwapTargets(false);
+    }
+  };
+
+  const handleSwapRequest = async () => {
+    if (!selectedShift || !swapTargetId) return;
+    setSwapping(true);
+    setRequestError("");
+    try {
+      const res = await fetch("/api/requests/swap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shiftId: selectedShift.id, targetUserId: swapTargetId }),
+      });
+      if (res.ok) {
+        setIsSwapOpen(false);
+        setSwapTargetId("");
+        setSelectedShift(null);
+        setIsShiftDetailOpen(false);
+      } else {
+        const data = await res.json();
+        setRequestError(data.error || "Failed to create swap request");
+      }
+    } catch (error) {
+      console.error("Failed to create swap request:", error);
+      setRequestError("Failed to create swap request");
+    } finally {
+      setSwapping(false);
+    }
   };
 
   const generateCalendarDays = () => {
@@ -805,6 +905,22 @@ export default function SchedulePage() {
                     </div>
                   )}
 
+                  {!isEditingShift && isUserAssignedToShift(selectedShift) && (
+                    <div className="space-y-2 pt-2 border-t">
+                      <Label>Your Actions</Label>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={openSwapDialog} className="flex-1">
+                          <ArrowLeftRight className="h-4 w-4 mr-2" />
+                          Request Swap
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={openDropDialog} className="flex-1">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Drop Shift
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {canManage && (
                     <div className="space-y-2 pt-2 border-t">
                       <Label>Assign Staff</Label>
@@ -884,6 +1000,112 @@ export default function SchedulePage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDropOpen} onOpenChange={setIsDropOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Drop Shift</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedShift && (
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedShift.location.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>{formatDate(selectedShift.date)} {selectedShift.start_time} - {selectedShift.end_time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{selectedShift.skill.name}</Badge>
+                </div>
+              </div>
+            )}
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-amber-800 dark:text-amber-200">Shift will be open for pickup</p>
+                  <p className="text-amber-700 dark:text-amber-300">Other staff can claim this shift for 24 hours. If unclaimed, you remain assigned.</p>
+                </div>
+              </div>
+            </div>
+            {requestError && (
+              <p className="text-sm text-red-500">{requestError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDropOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDropShift} disabled={dropping}>
+              {dropping ? "Processing..." : "Drop Shift"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSwapOpen} onOpenChange={setIsSwapOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Request Swap</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedShift && (
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedShift.location.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>{formatDate(selectedShift.date)} {selectedShift.start_time} - {selectedShift.end_time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{selectedShift.skill.name}</Badge>
+                </div>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="swap-target">Select colleague to swap with</Label>
+              {loadingSwapTargets ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : availableSwapTargets.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No eligible colleagues available for swap</p>
+              ) : (
+                <select
+                  id="swap-target"
+                  value={swapTargetId}
+                  onChange={(e) => {
+                    setSwapTargetId(e.target.value);
+                    setRequestError("");
+                  }}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Select colleague</option>
+                  {availableSwapTargets.map((staff) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.name} ({staff.email})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+            {requestError && (
+              <p className="text-sm text-red-500">{requestError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSwapOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSwapRequest} disabled={!swapTargetId || swapping}>
+              {swapping ? "Sending..." : "Request Swap"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

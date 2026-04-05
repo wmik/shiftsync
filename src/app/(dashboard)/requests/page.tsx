@@ -18,6 +18,11 @@ import {
 
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+interface Location {
+  id: string;
+  name: string;
+}
+
 interface Shift {
   id: string;
   date: string;
@@ -55,19 +60,44 @@ export default function RequestsPage() {
   const session = useSession();
   const [swapRequests, setSwapRequests] = useState<SwapRequest[]>([]);
   const [dropRequests, setDropRequests] = useState<DropRequest[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const isManager = session.data?.user?.role === "manager";
+  const isAdmin = session.data?.user?.role === "admin";
+
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [selectedLocation]);
+
+  const fetchLocations = async () => {
+    try {
+      const res = await fetch("/api/locations");
+      if (res.ok) {
+        const data = await res.json();
+        setLocations(data);
+        if (data.length > 0 && !selectedLocation) {
+          setSelectedLocation(data[0].id);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch locations:", err);
+    }
+  };
 
   const fetchRequests = async () => {
     try {
+      const params = selectedLocation ? `?locationId=${selectedLocation}` : "";
       const [swapRes, dropRes] = await Promise.all([
-        fetch("/api/requests/swap"),
-        fetch("/api/requests/drop"),
+        fetch(`/api/requests/swap${params}`),
+        fetch(`/api/requests/drop${params}`),
       ]);
 
       if (swapRes.ok) {
@@ -83,7 +113,7 @@ export default function RequestsPage() {
     }
   };
 
-  const handleSwapAction = async (id: string, action: "ACCEPT" | "REJECT" | "CANCEL") => {
+  const handleSwapAction = async (id: string, action: "ACCEPT" | "REJECT" | "CANCEL" | "APPROVE" | "DENY") => {
     setActionLoading(id);
     try {
       const res = await fetch(`/api/requests/swap/${id}`, {
@@ -93,6 +123,9 @@ export default function RequestsPage() {
       });
       if (res.ok) {
         await fetchRequests();
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to update swap request");
       }
     } catch (err) {
       console.error("Failed to update swap request:", err);
@@ -140,10 +173,14 @@ export default function RequestsPage() {
     switch (status) {
       case "PENDING":
         return <Badge variant="secondary">Pending</Badge>;
+      case "PENDING_APPROVAL":
+        return <Badge className="bg-amber-500">Awaiting Approval</Badge>;
       case "COMPLETED":
         return <Badge className="bg-green-500">Completed</Badge>;
       case "REJECTED":
         return <Badge variant="destructive">Rejected</Badge>;
+      case "DENIED":
+        return <Badge variant="destructive">Denied</Badge>;
       case "CANCELLED":
         return <Badge variant="outline">Cancelled</Badge>;
       default:
@@ -176,11 +213,30 @@ export default function RequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Requests</h1>
-        <p className="text-muted-foreground">
-          Manage swap and drop requests
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Requests</h1>
+          <p className="text-muted-foreground">
+            Manage swap and drop requests
+          </p>
+        </div>
+        {(isManager || isAdmin) && locations.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Location:</span>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+            >
+              <option value="">All Locations</option>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -204,6 +260,11 @@ export default function RequestsPage() {
             {mySwapRequests.filter((r) => r.status === "PENDING").length > 0 && (
               <Badge variant="secondary" className="ml-2">
                 {mySwapRequests.filter((r) => r.status === "PENDING").length}
+              </Badge>
+            )}
+            {(isManager || isAdmin) && swapRequests.filter((r) => r.status === "PENDING_APPROVAL").length > 0 && (
+              <Badge className="ml-1 bg-amber-500">
+                {swapRequests.filter((r) => r.status === "PENDING_APPROVAL").length}
               </Badge>
             )}
           </TabsTrigger>
@@ -304,6 +365,41 @@ export default function RequestsPage() {
                             </>
                           )}
                           {request.requester.id === session.data?.user?.id && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSwapAction(request.id, "CANCEL")}
+                              disabled={actionLoading === request.id}
+                            >
+                              Cancel
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                      {request.status === "PENDING_APPROVAL" && (isManager || isAdmin) && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleSwapAction(request.id, "APPROVE")}
+                            disabled={actionLoading === request.id}
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleSwapAction(request.id, "DENY")}
+                            disabled={actionLoading === request.id}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Deny
+                          </Button>
+                        </div>
+                      )}
+                      {request.status === "PENDING_APPROVAL" && (
+                        <div className="flex gap-2">
+                          {(request.requester.id === session.data?.user?.id || request.target.id === session.data?.user?.id) && (
                             <Button
                               size="sm"
                               variant="ghost"

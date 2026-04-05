@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { validateAssignment, suggestAlternatives } from "@/lib/constraints";
+import { createNotification, NOTIFICATION_MESSAGES } from "@/lib/notifications";
 
 export async function PUT(
   request: NextRequest,
@@ -130,6 +131,16 @@ export async function PUT(
           },
         });
       });
+
+      const shiftDetails = `${dropRequest.shift.location.name} - ${dropRequest.shift.date.toLocaleDateString()} ${dropRequest.shift.start_time}-${dropRequest.shift.end_time}`;
+      const originalUserId = dropRequest.shift.assignments[0]?.user_id;
+      if (originalUserId) {
+        await createNotification({
+          userId: originalUserId,
+          type: "DROP_CLAIMED",
+          message: NOTIFICATION_MESSAGES.DROP_CLAIMED(shiftDetails),
+        });
+      }
 
       const updated = await prisma.drop_request.findUnique({
         where: { id },

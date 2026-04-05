@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { createNotification, NOTIFICATION_MESSAGES } from "@/lib/notifications";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,11 +12,32 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
+    const locationId = searchParams.get("locationId");
 
-    const where: Record<string, unknown> = {};
+    const userRole = session.user.role;
+    const userId = session.user.id;
+
+    let where: Record<string, unknown> = {};
 
     if (status) {
       where.status = status;
+    }
+
+    if (locationId) {
+      where = {
+        ...where,
+        shift: { location_id: locationId },
+      };
+    }
+
+    if (userRole !== "admin") {
+      where = {
+        ...where,
+        OR: [
+          { shift: { assignments: { some: { user_id: userId } } } },
+          { claimed_by_user_id: userId },
+        ],
+      };
     }
 
     const requests = await prisma.drop_request.findMany({
@@ -25,6 +47,12 @@ export async function GET(request: NextRequest) {
           include: {
             location: true,
             skill: true,
+            assignments: {
+              where: { status: "CONFIRMED" },
+              include: {
+                assigned: { select: { id: true, name: true, email: true } },
+              },
+            },
           },
         },
         claimed_by: {
@@ -64,6 +92,8 @@ export async function POST(request: NextRequest) {
     const shift = await prisma.shift.findUnique({
       where: { id: shiftId },
       include: {
+        location: true,
+        skill: true,
         assignments: {
           where: { status: "CONFIRMED" },
         },
@@ -115,6 +145,13 @@ export async function POST(request: NextRequest) {
           },
         },
       },
+    });
+
+    const shiftDetails = `${shift.location.name} - ${shift.date.toLocaleDateString()} ${shift.start_time}-${shift.end_time}`;
+    await createNotification({
+      userId: session.user.id,
+      type: "DROP_REQUEST",
+      message: NOTIFICATION_MESSAGES.DROP_REQUEST(session.user.name || "You", shiftDetails),
     });
 
     return NextResponse.json(dropRequest, { status: 201 });

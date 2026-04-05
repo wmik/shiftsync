@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { createNotification, NOTIFICATION_MESSAGES } from "@/lib/notifications";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,11 +12,32 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
+    const locationId = searchParams.get("locationId");
 
-    const where: Record<string, unknown> = {};
+    const userRole = session.user.role;
+    const userId = session.user.id;
+
+    let where: Record<string, unknown> = {};
 
     if (status) {
       where.status = status;
+    }
+
+    if (locationId) {
+      where = {
+        ...where,
+        shift: { location_id: locationId },
+      };
+    }
+
+    if (userRole !== "admin") {
+      where = {
+        ...where,
+        OR: [
+          { requester_user_id: userId },
+          { target_user_id: userId },
+        ],
+      };
     }
 
     const requests = await prisma.swap_request.findMany({
@@ -67,6 +89,8 @@ export async function POST(request: NextRequest) {
     const shift = await prisma.shift.findUnique({
       where: { id: shiftId },
       include: {
+        location: true,
+        skill: true,
         assignments: {
           where: { status: "CONFIRMED" },
         },
@@ -123,6 +147,13 @@ export async function POST(request: NextRequest) {
           select: { id: true, name: true, email: true },
         },
       },
+    });
+
+    const shiftDetails = `${shift.location.name} - ${shift.date.toLocaleDateString()} ${shift.start_time}-${shift.end_time}`;
+    await createNotification({
+      userId: targetUserId,
+      type: "SWAP_REQUEST",
+      message: NOTIFICATION_MESSAGES.SWAP_REQUEST(session.user.name || "Someone", shiftDetails),
     });
 
     return NextResponse.json(swapRequest, { status: 201 });
