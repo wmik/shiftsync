@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import {
   Calendar,
   Users,
@@ -47,6 +47,7 @@ function SidebarContent({
     .map((n) => n[0])
     .join("")
     .toUpperCase() || "?";
+  const router = useRouter()
 
   return (
     <div className="flex flex-col h-full">
@@ -119,12 +120,18 @@ function SidebarContent({
             Settings
           </Button>
         </Link>
-        <form action="/api/auth/sign-out" method="post">
-          <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground mt-1">
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </Button>
-        </form>
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start gap-2 text-muted-foreground mt-1"
+          onClick={() => {
+            authClient.signOut()
+            router.push("/login")
+            router.refresh();
+          }}
+        >
+          <LogOut className="h-4 w-4" />
+          Sign out
+        </Button>
       </div>
     </div>
   );
