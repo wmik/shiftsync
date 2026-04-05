@@ -170,9 +170,7 @@ export default function LocationsPage() {
           {isAdmin && (
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <MoreVertical className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => openEdit(location)}>

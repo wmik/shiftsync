@@ -1,14 +1,23 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { admin } from "better-auth/plugins";
+import { nextCookies } from "better-auth/next-js"
+import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 import { ac, shiftSyncAdmin, shiftSyncManager, shiftSyncStaff } from "./permissions";
 
 export const auth = betterAuth({
+  trustedOrigins: (process.env.TRUSTED_ORIGINS || "")?.split(",").filter(Boolean),
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  emailAndPassword: { enabled: true },
+  emailAndPassword: { 
+    enabled: true,
+    password: {
+      hash: async password => await bcrypt.hash(password, 10),
+      verify: async ({ password, hash }) => bcrypt.compare(password, hash)
+    }
+  },
 
   user: {
     modelName: "user",
@@ -70,5 +79,6 @@ export const auth = betterAuth({
       defaultRole: "staff",
       adminRoles: ["admin"],
     }),
+    nextCookies()
   ],
 });

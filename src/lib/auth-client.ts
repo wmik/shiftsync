@@ -3,7 +3,7 @@ import { adminClient } from "better-auth/client/plugins";
 import { ac, shiftSyncAdmin, shiftSyncManager, shiftSyncStaff } from "@/lib/permissions";
 
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+  baseURL: process.env.NEXT_PUBLIC_SITE_URL,
   plugins: [
     adminClient({
       ac,
