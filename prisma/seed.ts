@@ -9,6 +9,13 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
+function getDateOffset(days: number): Date {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
 async function main() {
   console.log("🌱 Seeding database...");
 
@@ -66,7 +73,7 @@ async function main() {
     },
   });
 
-  await prisma.location.upsert({
+  const airport = await prisma.location.upsert({
     where: { name: "Coastal Eats - Airport" },
     update: {},
     create: {
@@ -160,7 +167,7 @@ async function main() {
   console.log("✅ Created manager user");
 
   const sarahId = nanoid();
-  const staff = await prisma.user.upsert({
+  const sarah = await prisma.user.upsert({
     where: { email: "sarah@coastaleats.com" },
     update: {},
     create: {
@@ -176,15 +183,15 @@ async function main() {
     where: {
       provider_id_user_id: {
         provider_id: "credential",
-        user_id: staff.id,
+        user_id: sarah.id,
       },
     },
     update: {},
     create: {
       id: nanoid(),
-      account_id: `${staff.id}-staff`,
+      account_id: `${sarah.id}-staff`,
       provider_id: "credential",
-      user_id: staff.id,
+      user_id: sarah.id,
       password: passwordHash,
     },
   });
@@ -192,25 +199,26 @@ async function main() {
   const serverSkill = skills.find((s) => s.name === "Server")!;
   await prisma.certification.createMany({
     data: [
-      { user_id: staff.id, location_id: downtown.id, skill_id: serverSkill.id, certified_at: new Date() },
+      { user_id: sarah.id, location_id: downtown.id, skill_id: serverSkill.id, certified_at: new Date() },
+      { user_id: sarah.id, location_id: marina.id, skill_id: serverSkill.id, certified_at: new Date() },
     ],
     skipDuplicates: true,
   });
 
   await prisma.availability.createMany({
     data: [
-      { user_id: staff.id, day_of_week: 1, start_time: "09:00", end_time: "22:00" },
-      { user_id: staff.id, day_of_week: 2, start_time: "09:00", end_time: "22:00" },
-      { user_id: staff.id, day_of_week: 3, start_time: "09:00", end_time: "22:00" },
-      { user_id: staff.id, day_of_week: 4, start_time: "09:00", end_time: "22:00" },
-      { user_id: staff.id, day_of_week: 5, start_time: "09:00", end_time: "22:00" },
+      { user_id: sarah.id, day_of_week: 1, start_time: "09:00", end_time: "22:00" },
+      { user_id: sarah.id, day_of_week: 2, start_time: "09:00", end_time: "22:00" },
+      { user_id: sarah.id, day_of_week: 3, start_time: "09:00", end_time: "22:00" },
+      { user_id: sarah.id, day_of_week: 4, start_time: "09:00", end_time: "22:00" },
+      { user_id: sarah.id, day_of_week: 5, start_time: "09:00", end_time: "22:00" },
     ],
     skipDuplicates: true,
   });
   console.log("✅ Created staff user (Sarah)");
 
   const mikeId = nanoid();
-  const staff2 = await prisma.user.upsert({
+  const mike = await prisma.user.upsert({
     where: { email: "mike@coastaleats.com" },
     update: {},
     create: {
@@ -226,15 +234,15 @@ async function main() {
     where: {
       provider_id_user_id: {
         provider_id: "credential",
-        user_id: staff2.id,
+        user_id: mike.id,
       },
     },
     update: {},
     create: {
       id: nanoid(),
-      account_id: `${staff2.id}-staff`,
+      account_id: `${mike.id}-staff`,
       provider_id: "credential",
-      user_id: staff2.id,
+      user_id: mike.id,
       password: passwordHash,
     },
   });
@@ -242,23 +250,142 @@ async function main() {
   const bartenderSkill = skills.find((s) => s.name === "Bartender")!;
   await prisma.certification.createMany({
     data: [
-      { user_id: staff2.id, location_id: downtown.id, skill_id: bartenderSkill.id, certified_at: new Date() },
-      { user_id: staff2.id, location_id: marina.id, skill_id: bartenderSkill.id, certified_at: new Date() },
+      { user_id: mike.id, location_id: downtown.id, skill_id: bartenderSkill.id, certified_at: new Date() },
+      { user_id: mike.id, location_id: marina.id, skill_id: bartenderSkill.id, certified_at: new Date() },
     ],
     skipDuplicates: true,
   });
 
   await prisma.availability.createMany({
     data: [
-      { user_id: staff2.id, day_of_week: 2, start_time: "16:00", end_time: "23:00" },
-      { user_id: staff2.id, day_of_week: 3, start_time: "16:00", end_time: "23:00" },
-      { user_id: staff2.id, day_of_week: 4, start_time: "16:00", end_time: "23:00" },
-      { user_id: staff2.id, day_of_week: 5, start_time: "16:00", end_time: "23:00" },
-      { user_id: staff2.id, day_of_week: 6, start_time: "16:00", end_time: "23:00" },
+      { user_id: mike.id, day_of_week: 2, start_time: "16:00", end_time: "23:00" },
+      { user_id: mike.id, day_of_week: 3, start_time: "16:00", end_time: "23:00" },
+      { user_id: mike.id, day_of_week: 4, start_time: "16:00", end_time: "23:00" },
+      { user_id: mike.id, day_of_week: 5, start_time: "16:00", end_time: "23:00" },
+      { user_id: mike.id, day_of_week: 6, start_time: "16:00", end_time: "23:00" },
     ],
     skipDuplicates: true,
   });
   console.log("✅ Created staff user (Mike)");
+
+  const grillCook = skills.find((s) => s.name === "Grill Cook")!;
+  const alexId = nanoid();
+  const alex = await prisma.user.upsert({
+    where: { email: "alex@coastaleats.com" },
+    update: {},
+    create: {
+      id: alexId,
+      email: "alex@coastaleats.com",
+      name: "Alex Rivera",
+      email_verified: true,
+      role: "staff",
+    },
+  });
+
+  await prisma.account.upsert({
+    where: {
+      provider_id_user_id: {
+        provider_id: "credential",
+        user_id: alex.id,
+      },
+    },
+    update: {},
+    create: {
+      id: nanoid(),
+      account_id: `${alex.id}-staff`,
+      provider_id: "credential",
+      user_id: alex.id,
+      password: passwordHash,
+    },
+  });
+
+  await prisma.certification.createMany({
+    data: [
+      { user_id: alex.id, location_id: downtown.id, skill_id: grillCook.id, certified_at: new Date() },
+      { user_id: alex.id, location_id: airport.id, skill_id: grillCook.id, certified_at: new Date() },
+    ],
+    skipDuplicates: true,
+  });
+
+  await prisma.availability.createMany({
+    data: [
+      { user_id: alex.id, day_of_week: 0, start_time: "10:00", end_time: "22:00" },
+      { user_id: alex.id, day_of_week: 1, start_time: "10:00", end_time: "22:00" },
+      { user_id: alex.id, day_of_week: 2, start_time: "10:00", end_time: "22:00" },
+      { user_id: alex.id, day_of_week: 3, start_time: "10:00", end_time: "22:00" },
+      { user_id: alex.id, day_of_week: 4, start_time: "10:00", end_time: "22:00" },
+      { user_id: alex.id, day_of_week: 5, start_time: "10:00", end_time: "22:00" },
+    ],
+    skipDuplicates: true,
+  });
+  console.log("✅ Created staff user (Alex)");
+
+  const shiftsToCreate = [
+    { days: 0, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: true },
+    { days: 0, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 1, published: true },
+    { days: 1, location: downtown, skill: serverSkill, startTime: "09:00", endTime: "17:00", headcount: 2, published: true },
+    { days: 1, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 1, published: true },
+    { days: 1, location: marina, skill: serverSkill, startTime: "11:00", endTime: "19:00", headcount: 1, published: true },
+    { days: 2, location: downtown, skill: grillCook, startTime: "10:00", endTime: "18:00", headcount: 1, published: true },
+    { days: 2, location: downtown, skill: serverSkill, startTime: "14:00", endTime: "22:00", headcount: 2, published: true },
+    { days: 3, location: airport, skill: grillCook, startTime: "06:00", endTime: "14:00", headcount: 1, published: true },
+    { days: 3, location: marina, skill: serverSkill, startTime: "16:00", endTime: "23:00", headcount: 2, published: true },
+    { days: 4, location: downtown, skill: serverSkill, startTime: "09:00", endTime: "17:00", headcount: 3, published: true },
+    { days: 4, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 2, published: true },
+    { days: 4, location: marina, skill: grillCook, startTime: "10:00", endTime: "18:00", headcount: 1, published: true },
+    { days: 5, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 3, published: true },
+    { days: 5, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 2, published: true },
+    { days: 5, location: marina, skill: serverSkill, startTime: "14:00", endTime: "22:00", headcount: 2, published: true },
+    { days: 6, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: false },
+    { days: 6, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 1, published: false },
+    { days: 7, location: downtown, skill: serverSkill, startTime: "09:00", endTime: "17:00", headcount: 2, published: false },
+    { days: 7, location: marina, skill: serverSkill, startTime: "11:00", endTime: "19:00", headcount: 1, published: false },
+  ];
+
+  const staffMembers = [sarah, mike, alex];
+  let shiftCount = 0;
+
+  for (const shiftData of shiftsToCreate) {
+    const shiftDate = getDateOffset(shiftData.days);
+    
+    const shift = await prisma.shift.create({
+      data: {
+        location_id: shiftData.location.id,
+        skill_id: shiftData.skill.id,
+        date: shiftDate,
+        start_time: shiftData.startTime,
+        end_time: shiftData.endTime,
+        headcount: shiftData.headcount,
+        is_published: shiftData.published,
+        created_by: manager.id,
+      },
+    });
+
+    if (shiftData.published && staffMembers.length > 0) {
+      const assignedStaff = staffMembers[shiftCount % staffMembers.length];
+      const hasCert = await prisma.certification.findFirst({
+        where: {
+          user_id: assignedStaff.id,
+          location_id: shiftData.location.id,
+          skill_id: shiftData.skill.id,
+        },
+      });
+
+      if (hasCert) {
+        await prisma.shift_assignment.create({
+          data: {
+            shift_id: shift.id,
+            user_id: assignedStaff.id,
+            assigned_by: manager.id,
+            status: "CONFIRMED",
+          },
+        });
+      }
+    }
+
+    shiftCount++;
+  }
+  console.log(`✅ Created ${shiftCount} shifts with assignments`);
 
   console.log("\n🎉 Seeding completed!");
   console.log("\nDemo accounts:");
@@ -266,6 +393,7 @@ async function main() {
   console.log("  Manager: manager@coastaleats.com / password123");
   console.log("  Staff:   sarah@coastaleats.com / password123");
   console.log("  Staff:   mike@coastaleats.com / password123");
+  console.log("  Staff:   alex@coastaleats.com / password123");
 }
 
 main()

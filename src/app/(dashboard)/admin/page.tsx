@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,13 +49,7 @@ export default function AdminPage() {
 
   const isAdmin = session.data?.user?.role === "admin";
 
-  useEffect(() => {
-    if (isAdmin) {
-      fetchAuditLogs();
-    }
-  }, [isAdmin]);
-
-  const fetchAuditLogs = async () => {
+  const fetchAuditLogs = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -72,7 +66,13 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterEntity]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAuditLogs();
+    }
+  }, [isAdmin, fetchAuditLogs]);
 
   const getActionBadge = (action: string) => {
     switch (action) {

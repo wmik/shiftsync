@@ -9,18 +9,11 @@ function getWeekStart(date: Date): Date {
   return new Date(d.setDate(diff));
 }
 
-function getWeekEnd(date: Date): Date {
-  const weekStart = getWeekStart(date);
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-  return weekEnd;
-}
-
 function getHoursBetween(start: string, end: string): number {
   const [startH, startM] = start.split(":").map(Number);
   const [endH, endM] = end.split(":").map(Number);
   let hours = endH - startH;
-  let minutes = endM - startM;
+  const minutes = endM - startM;
   if (hours < 0) hours += 24;
   return hours + minutes / 60;
 }
@@ -36,7 +29,6 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("userId");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    const groupBy = searchParams.get("groupBy") || "week";
 
     const dateFilter: Record<string, unknown> = {};
     if (startDate) {
