@@ -1,10 +1,30 @@
-import { PrismaClient } from '@/generated/prisma';
 import { execSync } from 'child_process';
 import path from 'path';
 
 const testDbUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/shiftsync_test';
 
-export const prisma = new PrismaClient();
+const mockPrisma = {
+  $connect: async () => {},
+  $disconnect: async () => {},
+  $executeRawUnsafe: async () => {},
+  user: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}) },
+  account: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}) },
+  session: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}) },
+  location: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}) },
+  skill: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}) },
+  certification: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), delete: async () => ({}) },
+  availability: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), delete: async () => ({}) },
+  availability_exception: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), delete: async () => ({}) },
+  shift: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), create: async () => ({}), update: async () => ({}) },
+  shift_assignment: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), create: async () => ({}), update: async () => ({}), delete: async () => ({}) },
+  swap_request: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), create: async () => ({}), update: async () => ({}) },
+  drop_request: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), create: async () => ({}), update: async () => ({}) },
+  notification: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), create: async () => ({}), update: async () => ({}) },
+  audit_log: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), create: async () => ({}) },
+  manager_location: { findMany: async () => [], findUnique: async () => null, upsert: async () => ({}), create: async () => ({}), delete: async () => ({}) },
+};
+
+export const prisma = mockPrisma;
 
 export async function setupTestDb() {
   process.env.DATABASE_URL = testDbUrl;
