@@ -930,6 +930,9 @@ export default function SchedulePage() {
                     <div className="flex items-center gap-2 text-sm">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span>{selectedShift.location.name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {selectedShift.location.timezone.split("/")[1]?.replace("_", " ") || selectedShift.location.timezone}
+                      </Badge>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <User className="h-4 w-4 text-muted-foreground" />
