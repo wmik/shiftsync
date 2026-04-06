@@ -27,6 +27,7 @@ import {
   User,
   ArrowLeftRight,
   AlertTriangle,
+  Calendar,
 } from "lucide-react";
 
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -91,6 +92,9 @@ export default function SchedulePage() {
   const [assigning, setAssigning] = useState(false);
   const [assignmentError, setAssignmentError] = useState("");
   const [isEditingShift, setIsEditingShift] = useState(false);
+  const [isPublishWeekOpen, setIsPublishWeekOpen] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishResult, setPublishResult] = useState<{ published?: number; notified?: number } | null>(null);
   const [editFormData, setEditFormData] = useState({
     locationId: "",
     skillId: "",
@@ -501,6 +505,39 @@ export default function SchedulePage() {
     }
   };
 
+  const getWeekStart = (date: Date): string => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day;
+    d.setDate(diff);
+    return d.toISOString().split("T")[0];
+  };
+
+  const handlePublishWeek = async () => {
+    setPublishing(true);
+    setPublishResult(null);
+    try {
+      const weekStart = getWeekStart(currentDate);
+      const res = await fetch("/api/shifts/week/publish", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weekStartDate: weekStart }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPublishResult({ published: data.published, notified: data.notified });
+        await fetchShifts();
+      } else {
+        alert(data.error || "Failed to publish week");
+      }
+    } catch (error) {
+      console.error("Failed to publish week:", error);
+      alert("Failed to publish week");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const generateCalendarDays = () => {
     const days = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
@@ -524,10 +561,16 @@ export default function SchedulePage() {
           <p className="text-muted-foreground">Manage and view shifts</p>
         </div>
         {canManage && (
-          <Button onClick={() => setIsCreateOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Shift
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => { setPublishResult(null); setIsPublishWeekOpen(true); }}>
+              <Calendar className="h-4 w-4 mr-2" />
+              Publish Week
+            </Button>
+            <Button onClick={() => setIsCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Shift
+            </Button>
+          </div>
         )}
       </div>
 
@@ -1181,6 +1224,43 @@ export default function SchedulePage() {
             <Button onClick={handleSwapRequest} disabled={!swapTargetId || swapping}>
               {swapping ? "Sending..." : "Request Swap"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isPublishWeekOpen} onOpenChange={setIsPublishWeekOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Publish Weekly Schedule</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              This will publish all unpublished shifts for the week of <strong>{getWeekStart(currentDate)}</strong> at your assigned locations.
+            </p>
+            {publishResult ? (
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                  Successfully published {publishResult.published} shifts
+                </p>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Notified {publishResult.notified} staff members
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Staff assigned to these shifts will receive a notification.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setIsPublishWeekOpen(false); setPublishResult(null); }}>
+              {publishResult ? "Done" : "Cancel"}
+            </Button>
+            {!publishResult && (
+              <Button onClick={handlePublishWeek} disabled={publishing}>
+                {publishing ? "Publishing..." : "Publish Week"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

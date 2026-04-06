@@ -5,6 +5,15 @@ import { createNotification, NOTIFICATION_MESSAGES } from "@/lib/notifications";
 
 export async function GET(request: NextRequest) {
   try {
+    const now = new Date();
+    await prisma.drop_request.updateMany({
+      where: {
+        status: "OPEN",
+        expires_at: { lt: now },
+      },
+      data: { status: "EXPIRED" },
+    });
+
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
