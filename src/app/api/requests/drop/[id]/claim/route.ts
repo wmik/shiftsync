@@ -64,6 +64,13 @@ export async function PUT(
     }
 
     if (action === "CANCEL") {
+      if (dropRequest.requested_by_user_id !== session.user.id) {
+        return NextResponse.json(
+          { error: "Only the requester can cancel this drop request" },
+          { status: 403 }
+        );
+      }
+
       await prisma.drop_request.update({
         where: { id },
         data: { status: "CANCELLED", claimed_by_user_id: null },
