@@ -320,29 +320,152 @@ async function main() {
   });
   console.log("✅ Created staff user (Alex)");
 
+  const timesSquare = await prisma.location.findUnique({
+    where: { name: "Coastal Eats - Times Square" },
+  });
+
+  const emilyId = nanoid();
+  const emily = await prisma.user.upsert({
+    where: { email: "emily@coastaleats.com" },
+    update: {},
+    create: {
+      id: emilyId,
+      email: "emily@coastaleats.com",
+      name: "Emily Watson",
+      email_verified: true,
+      role: "staff",
+    },
+  });
+
+  await prisma.account.upsert({
+    where: {
+      provider_id_user_id: {
+        provider_id: "credential",
+        user_id: emily.id,
+      },
+    },
+    update: {},
+    create: {
+      id: nanoid(),
+      account_id: `${emily.id}-staff`,
+      provider_id: "credential",
+      user_id: emily.id,
+      password: passwordHash,
+    },
+  });
+
+  const hostSkill = skills.find((s) => s.name === "Host")!;
+  await prisma.certification.createMany({
+    data: [
+      { user_id: emily.id, location_id: downtown.id, skill_id: hostSkill.id, certified_at: new Date() },
+      { user_id: emily.id, location_id: marina.id, skill_id: hostSkill.id, certified_at: new Date() },
+      { user_id: emily.id, location_id: timesSquare!.id, skill_id: hostSkill.id, certified_at: new Date() },
+    ],
+    skipDuplicates: true,
+  });
+
+  await prisma.availability.createMany({
+    data: [
+      { user_id: emily.id, day_of_week: 0, start_time: "09:00", end_time: "17:00" },
+      { user_id: emily.id, day_of_week: 1, start_time: "09:00", end_time: "17:00" },
+      { user_id: emily.id, day_of_week: 2, start_time: "09:00", end_time: "17:00" },
+      { user_id: emily.id, day_of_week: 3, start_time: "09:00", end_time: "17:00" },
+      { user_id: emily.id, day_of_week: 4, start_time: "09:00", end_time: "17:00" },
+      { user_id: emily.id, day_of_week: 5, start_time: "09:00", end_time: "17:00" },
+      { user_id: emily.id, day_of_week: 6, start_time: "09:00", end_time: "17:00" },
+    ],
+    skipDuplicates: true,
+  });
+  console.log("✅ Created cross-timezone staff user (Emily)");
+
+  const jamesId = nanoid();
+  const james = await prisma.user.upsert({
+    where: { email: "james@coastaleats.com" },
+    update: {},
+    create: {
+      id: jamesId,
+      email: "james@coastaleats.com",
+      name: "James Park",
+      email_verified: true,
+      role: "staff",
+    },
+  });
+
+  await prisma.account.upsert({
+    where: {
+      provider_id_user_id: {
+        provider_id: "credential",
+        user_id: james.id,
+      },
+    },
+    update: {},
+    create: {
+      id: nanoid(),
+      account_id: `${james.id}-staff`,
+      provider_id: "credential",
+      user_id: james.id,
+      password: passwordHash,
+    },
+  });
+
+  const lineCookSkill = skills.find((s) => s.name === "Line Cook")!;
+  await prisma.certification.createMany({
+    data: [
+      { user_id: james.id, location_id: downtown.id, skill_id: lineCookSkill.id, certified_at: new Date() },
+      { user_id: james.id, location_id: marina.id, skill_id: lineCookSkill.id, certified_at: new Date() },
+    ],
+    skipDuplicates: true,
+  });
+
+  await prisma.availability.createMany({
+    data: [
+      { user_id: james.id, day_of_week: 0, start_time: "08:00", end_time: "20:00" },
+      { user_id: james.id, day_of_week: 1, start_time: "08:00", end_time: "20:00" },
+      { user_id: james.id, day_of_week: 2, start_time: "08:00", end_time: "20:00" },
+      { user_id: james.id, day_of_week: 3, start_time: "08:00", end_time: "20:00" },
+      { user_id: james.id, day_of_week: 4, start_time: "08:00", end_time: "20:00" },
+      { user_id: james.id, day_of_week: 5, start_time: "08:00", end_time: "20:00" },
+    ],
+    skipDuplicates: true,
+  });
+  console.log("✅ Created overtime-prone staff user (James)");
+
   const shiftsToCreate = [
+    { days: -7, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: true },
+    { days: -7, location: downtown, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 1, published: true },
+    { days: -6, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: true },
+    { days: -5, location: downtown, skill: grillCook, startTime: "10:00", endTime: "18:00", headcount: 1, published: true },
+    { days: -4, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: true },
+    { days: -3, location: downtown, skill: lineCookSkill, startTime: "10:00", endTime: "18:00", headcount: 1, published: true },
+    { days: -2, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: true },
     { days: 0, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: true },
-    { days: 0, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 1, published: true },
+    { days: 0, location: downtown, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 1, published: true },
+    { days: 0, location: downtown, skill: serverSkill, startTime: "17:00", endTime: "23:00", headcount: 2, published: true, premium: true },
+    { days: 0, location: marina, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 1, published: true, premium: true },
     { days: 1, location: downtown, skill: serverSkill, startTime: "09:00", endTime: "17:00", headcount: 2, published: true },
-    { days: 1, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 1, published: true },
+    { days: 1, location: downtown, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 1, published: true },
     { days: 1, location: marina, skill: serverSkill, startTime: "11:00", endTime: "19:00", headcount: 1, published: true },
     { days: 2, location: downtown, skill: grillCook, startTime: "10:00", endTime: "18:00", headcount: 1, published: true },
     { days: 2, location: downtown, skill: serverSkill, startTime: "14:00", endTime: "22:00", headcount: 2, published: true },
     { days: 3, location: airport, skill: grillCook, startTime: "06:00", endTime: "14:00", headcount: 1, published: true },
-    { days: 3, location: marina, skill: serverSkill, startTime: "16:00", endTime: "23:00", headcount: 2, published: true },
+    { days: 3, location: marina, skill: serverSkill, startTime: "17:00", endTime: "23:00", headcount: 2, published: true },
     { days: 4, location: downtown, skill: serverSkill, startTime: "09:00", endTime: "17:00", headcount: 3, published: true },
-    { days: 4, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 2, published: true },
+    { days: 4, location: downtown, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 2, published: true, premium: true },
     { days: 4, location: marina, skill: grillCook, startTime: "10:00", endTime: "18:00", headcount: 1, published: true },
     { days: 5, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 3, published: true },
-    { days: 5, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 2, published: true },
-    { days: 5, location: marina, skill: serverSkill, startTime: "14:00", endTime: "22:00", headcount: 2, published: true },
+    { days: 5, location: downtown, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 2, published: true, premium: true },
+    { days: 5, location: marina, skill: serverSkill, startTime: "14:00", endTime: "22:00", headcount: 2, published: true, premium: true },
+    { days: 5, location: marina, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 2, published: true, premium: true },
     { days: 6, location: downtown, skill: serverSkill, startTime: "10:00", endTime: "18:00", headcount: 2, published: false },
-    { days: 6, location: downtown, skill: bartenderSkill, startTime: "16:00", endTime: "23:00", headcount: 1, published: false },
+    { days: 6, location: downtown, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 1, published: false, premium: true },
     { days: 7, location: downtown, skill: serverSkill, startTime: "09:00", endTime: "17:00", headcount: 2, published: false },
     { days: 7, location: marina, skill: serverSkill, startTime: "11:00", endTime: "19:00", headcount: 1, published: false },
+    { days: 14, location: downtown, skill: serverSkill, startTime: "17:00", endTime: "23:00", headcount: 2, published: false, premium: true },
+    { days: 14, location: marina, skill: bartenderSkill, startTime: "17:00", endTime: "23:00", headcount: 2, published: false, premium: true },
   ];
 
   const staffMembers = [sarah, mike, alex];
+  const allStaff = [sarah, mike, alex, emily, james];
   let shiftCount = 0;
 
   for (const shiftData of shiftsToCreate) {
@@ -361,8 +484,15 @@ async function main() {
       },
     });
 
-    if (shiftData.published && staffMembers.length > 0) {
-      const assignedStaff = staffMembers[shiftCount % staffMembers.length];
+    if (shiftData.published && allStaff.length > 0) {
+      let assignedStaff;
+      
+      if (james && shiftCount < 7) {
+        assignedStaff = james;
+      } else {
+        assignedStaff = allStaff[shiftCount % allStaff.length];
+      }
+      
       const hasCert = await prisma.certification.findFirst({
         where: {
           user_id: assignedStaff.id,
@@ -386,6 +516,7 @@ async function main() {
     shiftCount++;
   }
   console.log(`✅ Created ${shiftCount} shifts with assignments`);
+  console.log("   Premium shifts (Fri/Sat evenings) marked for fairness tracking");
 
   console.log("\n🎉 Seeding completed!");
   console.log("\nDemo accounts:");
@@ -394,6 +525,8 @@ async function main() {
   console.log("  Staff:   sarah@coastaleats.com / password123");
   console.log("  Staff:   mike@coastaleats.com / password123");
   console.log("  Staff:   alex@coastaleats.com / password123");
+  console.log("  Staff:   emily@coastaleats.com / password123 (cross-timezone)");
+  console.log("  Staff:   james@coastaleats.com / password123 (overtime-prone)");
 }
 
 main()
