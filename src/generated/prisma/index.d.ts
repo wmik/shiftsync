@@ -2241,7 +2241,8 @@ export namespace Prisma {
     created_shifts: number
     swap_requests_made: number
     swap_requests_received: number
-    drop_requests: number
+    drop_requests_made: number
+    drop_requests_claimed: number
     notifications: number
     audit_logs: number
     manager_locations: number
@@ -2258,7 +2259,8 @@ export namespace Prisma {
     created_shifts?: boolean | UserCountOutputTypeCountCreated_shiftsArgs
     swap_requests_made?: boolean | UserCountOutputTypeCountSwap_requests_madeArgs
     swap_requests_received?: boolean | UserCountOutputTypeCountSwap_requests_receivedArgs
-    drop_requests?: boolean | UserCountOutputTypeCountDrop_requestsArgs
+    drop_requests_made?: boolean | UserCountOutputTypeCountDrop_requests_madeArgs
+    drop_requests_claimed?: boolean | UserCountOutputTypeCountDrop_requests_claimedArgs
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
     audit_logs?: boolean | UserCountOutputTypeCountAudit_logsArgs
     manager_locations?: boolean | UserCountOutputTypeCountManager_locationsArgs
@@ -2348,7 +2350,14 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountDrop_requestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountDrop_requests_madeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: drop_requestWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDrop_requests_claimedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: drop_requestWhereInput
   }
 
@@ -2750,7 +2759,8 @@ export namespace Prisma {
     created_shifts?: boolean | user$created_shiftsArgs<ExtArgs>
     swap_requests_made?: boolean | user$swap_requests_madeArgs<ExtArgs>
     swap_requests_received?: boolean | user$swap_requests_receivedArgs<ExtArgs>
-    drop_requests?: boolean | user$drop_requestsArgs<ExtArgs>
+    drop_requests_made?: boolean | user$drop_requests_madeArgs<ExtArgs>
+    drop_requests_claimed?: boolean | user$drop_requests_claimedArgs<ExtArgs>
     notifications?: boolean | user$notificationsArgs<ExtArgs>
     audit_logs?: boolean | user$audit_logsArgs<ExtArgs>
     manager_locations?: boolean | user$manager_locationsArgs<ExtArgs>
@@ -2817,7 +2827,8 @@ export namespace Prisma {
     created_shifts?: boolean | user$created_shiftsArgs<ExtArgs>
     swap_requests_made?: boolean | user$swap_requests_madeArgs<ExtArgs>
     swap_requests_received?: boolean | user$swap_requests_receivedArgs<ExtArgs>
-    drop_requests?: boolean | user$drop_requestsArgs<ExtArgs>
+    drop_requests_made?: boolean | user$drop_requests_madeArgs<ExtArgs>
+    drop_requests_claimed?: boolean | user$drop_requests_claimedArgs<ExtArgs>
     notifications?: boolean | user$notificationsArgs<ExtArgs>
     audit_logs?: boolean | user$audit_logsArgs<ExtArgs>
     manager_locations?: boolean | user$manager_locationsArgs<ExtArgs>
@@ -2839,7 +2850,8 @@ export namespace Prisma {
       created_shifts: Prisma.$shiftPayload<ExtArgs>[]
       swap_requests_made: Prisma.$swap_requestPayload<ExtArgs>[]
       swap_requests_received: Prisma.$swap_requestPayload<ExtArgs>[]
-      drop_requests: Prisma.$drop_requestPayload<ExtArgs>[]
+      drop_requests_made: Prisma.$drop_requestPayload<ExtArgs>[]
+      drop_requests_claimed: Prisma.$drop_requestPayload<ExtArgs>[]
       notifications: Prisma.$notificationPayload<ExtArgs>[]
       audit_logs: Prisma.$audit_logPayload<ExtArgs>[]
       manager_locations: Prisma.$manager_locationPayload<ExtArgs>[]
@@ -3262,7 +3274,8 @@ export namespace Prisma {
     created_shifts<T extends user$created_shiftsArgs<ExtArgs> = {}>(args?: Subset<T, user$created_shiftsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$shiftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     swap_requests_made<T extends user$swap_requests_madeArgs<ExtArgs> = {}>(args?: Subset<T, user$swap_requests_madeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$swap_requestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     swap_requests_received<T extends user$swap_requests_receivedArgs<ExtArgs> = {}>(args?: Subset<T, user$swap_requests_receivedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$swap_requestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    drop_requests<T extends user$drop_requestsArgs<ExtArgs> = {}>(args?: Subset<T, user$drop_requestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$drop_requestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    drop_requests_made<T extends user$drop_requests_madeArgs<ExtArgs> = {}>(args?: Subset<T, user$drop_requests_madeArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$drop_requestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    drop_requests_claimed<T extends user$drop_requests_claimedArgs<ExtArgs> = {}>(args?: Subset<T, user$drop_requests_claimedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$drop_requestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends user$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, user$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$notificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     audit_logs<T extends user$audit_logsArgs<ExtArgs> = {}>(args?: Subset<T, user$audit_logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$audit_logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     manager_locations<T extends user$manager_locationsArgs<ExtArgs> = {}>(args?: Subset<T, user$manager_locationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$manager_locationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3941,9 +3954,33 @@ export namespace Prisma {
   }
 
   /**
-   * user.drop_requests
+   * user.drop_requests_made
    */
-  export type user$drop_requestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type user$drop_requests_madeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the drop_request
+     */
+    select?: drop_requestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the drop_request
+     */
+    omit?: drop_requestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: drop_requestInclude<ExtArgs> | null
+    where?: drop_requestWhereInput
+    orderBy?: drop_requestOrderByWithRelationInput | drop_requestOrderByWithRelationInput[]
+    cursor?: drop_requestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Drop_requestScalarFieldEnum | Drop_requestScalarFieldEnum[]
+  }
+
+  /**
+   * user.drop_requests_claimed
+   */
+  export type user$drop_requests_claimedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the drop_request
      */
@@ -16353,6 +16390,7 @@ export namespace Prisma {
   export type Drop_requestMinAggregateOutputType = {
     id: string | null
     shift_id: string | null
+    requested_by_user_id: string | null
     status: string | null
     expires_at: Date | null
     claimed_by_user_id: string | null
@@ -16362,6 +16400,7 @@ export namespace Prisma {
   export type Drop_requestMaxAggregateOutputType = {
     id: string | null
     shift_id: string | null
+    requested_by_user_id: string | null
     status: string | null
     expires_at: Date | null
     claimed_by_user_id: string | null
@@ -16371,6 +16410,7 @@ export namespace Prisma {
   export type Drop_requestCountAggregateOutputType = {
     id: number
     shift_id: number
+    requested_by_user_id: number
     status: number
     expires_at: number
     claimed_by_user_id: number
@@ -16382,6 +16422,7 @@ export namespace Prisma {
   export type Drop_requestMinAggregateInputType = {
     id?: true
     shift_id?: true
+    requested_by_user_id?: true
     status?: true
     expires_at?: true
     claimed_by_user_id?: true
@@ -16391,6 +16432,7 @@ export namespace Prisma {
   export type Drop_requestMaxAggregateInputType = {
     id?: true
     shift_id?: true
+    requested_by_user_id?: true
     status?: true
     expires_at?: true
     claimed_by_user_id?: true
@@ -16400,6 +16442,7 @@ export namespace Prisma {
   export type Drop_requestCountAggregateInputType = {
     id?: true
     shift_id?: true
+    requested_by_user_id?: true
     status?: true
     expires_at?: true
     claimed_by_user_id?: true
@@ -16482,6 +16525,7 @@ export namespace Prisma {
   export type Drop_requestGroupByOutputType = {
     id: string
     shift_id: string
+    requested_by_user_id: string
     status: string
     expires_at: Date
     claimed_by_user_id: string | null
@@ -16508,56 +16552,66 @@ export namespace Prisma {
   export type drop_requestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     shift_id?: boolean
+    requested_by_user_id?: boolean
     status?: boolean
     expires_at?: boolean
     claimed_by_user_id?: boolean
     created_at?: boolean
     shift?: boolean | shiftDefaultArgs<ExtArgs>
+    requested_by?: boolean | userDefaultArgs<ExtArgs>
     claimed_by?: boolean | drop_request$claimed_byArgs<ExtArgs>
   }, ExtArgs["result"]["drop_request"]>
 
   export type drop_requestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     shift_id?: boolean
+    requested_by_user_id?: boolean
     status?: boolean
     expires_at?: boolean
     claimed_by_user_id?: boolean
     created_at?: boolean
     shift?: boolean | shiftDefaultArgs<ExtArgs>
+    requested_by?: boolean | userDefaultArgs<ExtArgs>
     claimed_by?: boolean | drop_request$claimed_byArgs<ExtArgs>
   }, ExtArgs["result"]["drop_request"]>
 
   export type drop_requestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     shift_id?: boolean
+    requested_by_user_id?: boolean
     status?: boolean
     expires_at?: boolean
     claimed_by_user_id?: boolean
     created_at?: boolean
     shift?: boolean | shiftDefaultArgs<ExtArgs>
+    requested_by?: boolean | userDefaultArgs<ExtArgs>
     claimed_by?: boolean | drop_request$claimed_byArgs<ExtArgs>
   }, ExtArgs["result"]["drop_request"]>
 
   export type drop_requestSelectScalar = {
     id?: boolean
     shift_id?: boolean
+    requested_by_user_id?: boolean
     status?: boolean
     expires_at?: boolean
     claimed_by_user_id?: boolean
     created_at?: boolean
   }
 
-  export type drop_requestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shift_id" | "status" | "expires_at" | "claimed_by_user_id" | "created_at", ExtArgs["result"]["drop_request"]>
+  export type drop_requestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shift_id" | "requested_by_user_id" | "status" | "expires_at" | "claimed_by_user_id" | "created_at", ExtArgs["result"]["drop_request"]>
   export type drop_requestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     shift?: boolean | shiftDefaultArgs<ExtArgs>
+    requested_by?: boolean | userDefaultArgs<ExtArgs>
     claimed_by?: boolean | drop_request$claimed_byArgs<ExtArgs>
   }
   export type drop_requestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     shift?: boolean | shiftDefaultArgs<ExtArgs>
+    requested_by?: boolean | userDefaultArgs<ExtArgs>
     claimed_by?: boolean | drop_request$claimed_byArgs<ExtArgs>
   }
   export type drop_requestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     shift?: boolean | shiftDefaultArgs<ExtArgs>
+    requested_by?: boolean | userDefaultArgs<ExtArgs>
     claimed_by?: boolean | drop_request$claimed_byArgs<ExtArgs>
   }
 
@@ -16565,11 +16619,13 @@ export namespace Prisma {
     name: "drop_request"
     objects: {
       shift: Prisma.$shiftPayload<ExtArgs>
+      requested_by: Prisma.$userPayload<ExtArgs>
       claimed_by: Prisma.$userPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       shift_id: string
+      requested_by_user_id: string
       status: string
       expires_at: Date
       claimed_by_user_id: string | null
@@ -16969,6 +17025,7 @@ export namespace Prisma {
   export interface Prisma__drop_requestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     shift<T extends shiftDefaultArgs<ExtArgs> = {}>(args?: Subset<T, shiftDefaultArgs<ExtArgs>>): Prisma__shiftClient<$Result.GetResult<Prisma.$shiftPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    requested_by<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     claimed_by<T extends drop_request$claimed_byArgs<ExtArgs> = {}>(args?: Subset<T, drop_request$claimed_byArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -17001,6 +17058,7 @@ export namespace Prisma {
   interface drop_requestFieldRefs {
     readonly id: FieldRef<"drop_request", 'String'>
     readonly shift_id: FieldRef<"drop_request", 'String'>
+    readonly requested_by_user_id: FieldRef<"drop_request", 'String'>
     readonly status: FieldRef<"drop_request", 'String'>
     readonly expires_at: FieldRef<"drop_request", 'DateTime'>
     readonly claimed_by_user_id: FieldRef<"drop_request", 'String'>
@@ -20840,6 +20898,7 @@ export namespace Prisma {
   export const Drop_requestScalarFieldEnum: {
     id: 'id',
     shift_id: 'shift_id',
+    requested_by_user_id: 'requested_by_user_id',
     status: 'status',
     expires_at: 'expires_at',
     claimed_by_user_id: 'claimed_by_user_id',
@@ -21037,7 +21096,8 @@ export namespace Prisma {
     created_shifts?: ShiftListRelationFilter
     swap_requests_made?: Swap_requestListRelationFilter
     swap_requests_received?: Swap_requestListRelationFilter
-    drop_requests?: Drop_requestListRelationFilter
+    drop_requests_made?: Drop_requestListRelationFilter
+    drop_requests_claimed?: Drop_requestListRelationFilter
     notifications?: NotificationListRelationFilter
     audit_logs?: Audit_logListRelationFilter
     manager_locations?: Manager_locationListRelationFilter
@@ -21067,7 +21127,8 @@ export namespace Prisma {
     created_shifts?: shiftOrderByRelationAggregateInput
     swap_requests_made?: swap_requestOrderByRelationAggregateInput
     swap_requests_received?: swap_requestOrderByRelationAggregateInput
-    drop_requests?: drop_requestOrderByRelationAggregateInput
+    drop_requests_made?: drop_requestOrderByRelationAggregateInput
+    drop_requests_claimed?: drop_requestOrderByRelationAggregateInput
     notifications?: notificationOrderByRelationAggregateInput
     audit_logs?: audit_logOrderByRelationAggregateInput
     manager_locations?: manager_locationOrderByRelationAggregateInput
@@ -21100,7 +21161,8 @@ export namespace Prisma {
     created_shifts?: ShiftListRelationFilter
     swap_requests_made?: Swap_requestListRelationFilter
     swap_requests_received?: Swap_requestListRelationFilter
-    drop_requests?: Drop_requestListRelationFilter
+    drop_requests_made?: Drop_requestListRelationFilter
+    drop_requests_claimed?: Drop_requestListRelationFilter
     notifications?: NotificationListRelationFilter
     audit_logs?: Audit_logListRelationFilter
     manager_locations?: Manager_locationListRelationFilter
@@ -21926,22 +21988,26 @@ export namespace Prisma {
     NOT?: drop_requestWhereInput | drop_requestWhereInput[]
     id?: StringFilter<"drop_request"> | string
     shift_id?: StringFilter<"drop_request"> | string
+    requested_by_user_id?: StringFilter<"drop_request"> | string
     status?: StringFilter<"drop_request"> | string
     expires_at?: DateTimeFilter<"drop_request"> | Date | string
     claimed_by_user_id?: StringNullableFilter<"drop_request"> | string | null
     created_at?: DateTimeFilter<"drop_request"> | Date | string
     shift?: XOR<ShiftScalarRelationFilter, shiftWhereInput>
+    requested_by?: XOR<UserScalarRelationFilter, userWhereInput>
     claimed_by?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
   }
 
   export type drop_requestOrderByWithRelationInput = {
     id?: SortOrder
     shift_id?: SortOrder
+    requested_by_user_id?: SortOrder
     status?: SortOrder
     expires_at?: SortOrder
     claimed_by_user_id?: SortOrderInput | SortOrder
     created_at?: SortOrder
     shift?: shiftOrderByWithRelationInput
+    requested_by?: userOrderByWithRelationInput
     claimed_by?: userOrderByWithRelationInput
   }
 
@@ -21951,17 +22017,20 @@ export namespace Prisma {
     OR?: drop_requestWhereInput[]
     NOT?: drop_requestWhereInput | drop_requestWhereInput[]
     shift_id?: StringFilter<"drop_request"> | string
+    requested_by_user_id?: StringFilter<"drop_request"> | string
     status?: StringFilter<"drop_request"> | string
     expires_at?: DateTimeFilter<"drop_request"> | Date | string
     claimed_by_user_id?: StringNullableFilter<"drop_request"> | string | null
     created_at?: DateTimeFilter<"drop_request"> | Date | string
     shift?: XOR<ShiftScalarRelationFilter, shiftWhereInput>
+    requested_by?: XOR<UserScalarRelationFilter, userWhereInput>
     claimed_by?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
   }, "id">
 
   export type drop_requestOrderByWithAggregationInput = {
     id?: SortOrder
     shift_id?: SortOrder
+    requested_by_user_id?: SortOrder
     status?: SortOrder
     expires_at?: SortOrder
     claimed_by_user_id?: SortOrderInput | SortOrder
@@ -21977,6 +22046,7 @@ export namespace Prisma {
     NOT?: drop_requestScalarWhereWithAggregatesInput | drop_requestScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"drop_request"> | string
     shift_id?: StringWithAggregatesFilter<"drop_request"> | string
+    requested_by_user_id?: StringWithAggregatesFilter<"drop_request"> | string
     status?: StringWithAggregatesFilter<"drop_request"> | string
     expires_at?: DateTimeWithAggregatesFilter<"drop_request"> | Date | string
     claimed_by_user_id?: StringNullableWithAggregatesFilter<"drop_request"> | string | null
@@ -22186,7 +22256,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -22216,7 +22287,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -22246,7 +22318,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -22276,7 +22349,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -23143,12 +23217,14 @@ export namespace Prisma {
     expires_at: Date | string
     created_at?: Date | string
     shift: shiftCreateNestedOneWithoutDrop_requestsInput
-    claimed_by?: userCreateNestedOneWithoutDrop_requestsInput
+    requested_by: userCreateNestedOneWithoutDrop_requests_madeInput
+    claimed_by?: userCreateNestedOneWithoutDrop_requests_claimedInput
   }
 
   export type drop_requestUncheckedCreateInput = {
     id?: string
     shift_id: string
+    requested_by_user_id: string
     status?: string
     expires_at: Date | string
     claimed_by_user_id?: string | null
@@ -23161,12 +23237,14 @@ export namespace Prisma {
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     shift?: shiftUpdateOneRequiredWithoutDrop_requestsNestedInput
-    claimed_by?: userUpdateOneWithoutDrop_requestsNestedInput
+    requested_by?: userUpdateOneRequiredWithoutDrop_requests_madeNestedInput
+    claimed_by?: userUpdateOneWithoutDrop_requests_claimedNestedInput
   }
 
   export type drop_requestUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     shift_id?: StringFieldUpdateOperationsInput | string
+    requested_by_user_id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     claimed_by_user_id?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23176,6 +23254,7 @@ export namespace Prisma {
   export type drop_requestCreateManyInput = {
     id?: string
     shift_id: string
+    requested_by_user_id: string
     status?: string
     expires_at: Date | string
     claimed_by_user_id?: string | null
@@ -23192,6 +23271,7 @@ export namespace Prisma {
   export type drop_requestUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     shift_id?: StringFieldUpdateOperationsInput | string
+    requested_by_user_id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     claimed_by_user_id?: NullableStringFieldUpdateOperationsInput | string | null
@@ -24153,6 +24233,7 @@ export namespace Prisma {
   export type drop_requestCountOrderByAggregateInput = {
     id?: SortOrder
     shift_id?: SortOrder
+    requested_by_user_id?: SortOrder
     status?: SortOrder
     expires_at?: SortOrder
     claimed_by_user_id?: SortOrder
@@ -24162,6 +24243,7 @@ export namespace Prisma {
   export type drop_requestMaxOrderByAggregateInput = {
     id?: SortOrder
     shift_id?: SortOrder
+    requested_by_user_id?: SortOrder
     status?: SortOrder
     expires_at?: SortOrder
     claimed_by_user_id?: SortOrder
@@ -24171,6 +24253,7 @@ export namespace Prisma {
   export type drop_requestMinOrderByAggregateInput = {
     id?: SortOrder
     shift_id?: SortOrder
+    requested_by_user_id?: SortOrder
     status?: SortOrder
     expires_at?: SortOrder
     claimed_by_user_id?: SortOrder
@@ -24326,6 +24409,13 @@ export namespace Prisma {
     connect?: swap_requestWhereUniqueInput | swap_requestWhereUniqueInput[]
   }
 
+  export type drop_requestCreateNestedManyWithoutRequested_byInput = {
+    create?: XOR<drop_requestCreateWithoutRequested_byInput, drop_requestUncheckedCreateWithoutRequested_byInput> | drop_requestCreateWithoutRequested_byInput[] | drop_requestUncheckedCreateWithoutRequested_byInput[]
+    connectOrCreate?: drop_requestCreateOrConnectWithoutRequested_byInput | drop_requestCreateOrConnectWithoutRequested_byInput[]
+    createMany?: drop_requestCreateManyRequested_byInputEnvelope
+    connect?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+  }
+
   export type drop_requestCreateNestedManyWithoutClaimed_byInput = {
     create?: XOR<drop_requestCreateWithoutClaimed_byInput, drop_requestUncheckedCreateWithoutClaimed_byInput> | drop_requestCreateWithoutClaimed_byInput[] | drop_requestUncheckedCreateWithoutClaimed_byInput[]
     connectOrCreate?: drop_requestCreateOrConnectWithoutClaimed_byInput | drop_requestCreateOrConnectWithoutClaimed_byInput[]
@@ -24422,6 +24512,13 @@ export namespace Prisma {
     connectOrCreate?: swap_requestCreateOrConnectWithoutTargetInput | swap_requestCreateOrConnectWithoutTargetInput[]
     createMany?: swap_requestCreateManyTargetInputEnvelope
     connect?: swap_requestWhereUniqueInput | swap_requestWhereUniqueInput[]
+  }
+
+  export type drop_requestUncheckedCreateNestedManyWithoutRequested_byInput = {
+    create?: XOR<drop_requestCreateWithoutRequested_byInput, drop_requestUncheckedCreateWithoutRequested_byInput> | drop_requestCreateWithoutRequested_byInput[] | drop_requestUncheckedCreateWithoutRequested_byInput[]
+    connectOrCreate?: drop_requestCreateOrConnectWithoutRequested_byInput | drop_requestCreateOrConnectWithoutRequested_byInput[]
+    createMany?: drop_requestCreateManyRequested_byInputEnvelope
+    connect?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
   }
 
   export type drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput = {
@@ -24610,6 +24707,20 @@ export namespace Prisma {
     update?: swap_requestUpdateWithWhereUniqueWithoutTargetInput | swap_requestUpdateWithWhereUniqueWithoutTargetInput[]
     updateMany?: swap_requestUpdateManyWithWhereWithoutTargetInput | swap_requestUpdateManyWithWhereWithoutTargetInput[]
     deleteMany?: swap_requestScalarWhereInput | swap_requestScalarWhereInput[]
+  }
+
+  export type drop_requestUpdateManyWithoutRequested_byNestedInput = {
+    create?: XOR<drop_requestCreateWithoutRequested_byInput, drop_requestUncheckedCreateWithoutRequested_byInput> | drop_requestCreateWithoutRequested_byInput[] | drop_requestUncheckedCreateWithoutRequested_byInput[]
+    connectOrCreate?: drop_requestCreateOrConnectWithoutRequested_byInput | drop_requestCreateOrConnectWithoutRequested_byInput[]
+    upsert?: drop_requestUpsertWithWhereUniqueWithoutRequested_byInput | drop_requestUpsertWithWhereUniqueWithoutRequested_byInput[]
+    createMany?: drop_requestCreateManyRequested_byInputEnvelope
+    set?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    disconnect?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    delete?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    connect?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    update?: drop_requestUpdateWithWhereUniqueWithoutRequested_byInput | drop_requestUpdateWithWhereUniqueWithoutRequested_byInput[]
+    updateMany?: drop_requestUpdateManyWithWhereWithoutRequested_byInput | drop_requestUpdateManyWithWhereWithoutRequested_byInput[]
+    deleteMany?: drop_requestScalarWhereInput | drop_requestScalarWhereInput[]
   }
 
   export type drop_requestUpdateManyWithoutClaimed_byNestedInput = {
@@ -24806,6 +24917,20 @@ export namespace Prisma {
     update?: swap_requestUpdateWithWhereUniqueWithoutTargetInput | swap_requestUpdateWithWhereUniqueWithoutTargetInput[]
     updateMany?: swap_requestUpdateManyWithWhereWithoutTargetInput | swap_requestUpdateManyWithWhereWithoutTargetInput[]
     deleteMany?: swap_requestScalarWhereInput | swap_requestScalarWhereInput[]
+  }
+
+  export type drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput = {
+    create?: XOR<drop_requestCreateWithoutRequested_byInput, drop_requestUncheckedCreateWithoutRequested_byInput> | drop_requestCreateWithoutRequested_byInput[] | drop_requestUncheckedCreateWithoutRequested_byInput[]
+    connectOrCreate?: drop_requestCreateOrConnectWithoutRequested_byInput | drop_requestCreateOrConnectWithoutRequested_byInput[]
+    upsert?: drop_requestUpsertWithWhereUniqueWithoutRequested_byInput | drop_requestUpsertWithWhereUniqueWithoutRequested_byInput[]
+    createMany?: drop_requestCreateManyRequested_byInputEnvelope
+    set?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    disconnect?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    delete?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    connect?: drop_requestWhereUniqueInput | drop_requestWhereUniqueInput[]
+    update?: drop_requestUpdateWithWhereUniqueWithoutRequested_byInput | drop_requestUpdateWithWhereUniqueWithoutRequested_byInput[]
+    updateMany?: drop_requestUpdateManyWithWhereWithoutRequested_byInput | drop_requestUpdateManyWithWhereWithoutRequested_byInput[]
+    deleteMany?: drop_requestScalarWhereInput | drop_requestScalarWhereInput[]
   }
 
   export type drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput = {
@@ -25438,9 +25563,15 @@ export namespace Prisma {
     connect?: shiftWhereUniqueInput
   }
 
-  export type userCreateNestedOneWithoutDrop_requestsInput = {
-    create?: XOR<userCreateWithoutDrop_requestsInput, userUncheckedCreateWithoutDrop_requestsInput>
-    connectOrCreate?: userCreateOrConnectWithoutDrop_requestsInput
+  export type userCreateNestedOneWithoutDrop_requests_madeInput = {
+    create?: XOR<userCreateWithoutDrop_requests_madeInput, userUncheckedCreateWithoutDrop_requests_madeInput>
+    connectOrCreate?: userCreateOrConnectWithoutDrop_requests_madeInput
+    connect?: userWhereUniqueInput
+  }
+
+  export type userCreateNestedOneWithoutDrop_requests_claimedInput = {
+    create?: XOR<userCreateWithoutDrop_requests_claimedInput, userUncheckedCreateWithoutDrop_requests_claimedInput>
+    connectOrCreate?: userCreateOrConnectWithoutDrop_requests_claimedInput
     connect?: userWhereUniqueInput
   }
 
@@ -25452,14 +25583,22 @@ export namespace Prisma {
     update?: XOR<XOR<shiftUpdateToOneWithWhereWithoutDrop_requestsInput, shiftUpdateWithoutDrop_requestsInput>, shiftUncheckedUpdateWithoutDrop_requestsInput>
   }
 
-  export type userUpdateOneWithoutDrop_requestsNestedInput = {
-    create?: XOR<userCreateWithoutDrop_requestsInput, userUncheckedCreateWithoutDrop_requestsInput>
-    connectOrCreate?: userCreateOrConnectWithoutDrop_requestsInput
-    upsert?: userUpsertWithoutDrop_requestsInput
+  export type userUpdateOneRequiredWithoutDrop_requests_madeNestedInput = {
+    create?: XOR<userCreateWithoutDrop_requests_madeInput, userUncheckedCreateWithoutDrop_requests_madeInput>
+    connectOrCreate?: userCreateOrConnectWithoutDrop_requests_madeInput
+    upsert?: userUpsertWithoutDrop_requests_madeInput
+    connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutDrop_requests_madeInput, userUpdateWithoutDrop_requests_madeInput>, userUncheckedUpdateWithoutDrop_requests_madeInput>
+  }
+
+  export type userUpdateOneWithoutDrop_requests_claimedNestedInput = {
+    create?: XOR<userCreateWithoutDrop_requests_claimedInput, userUncheckedCreateWithoutDrop_requests_claimedInput>
+    connectOrCreate?: userCreateOrConnectWithoutDrop_requests_claimedInput
+    upsert?: userUpsertWithoutDrop_requests_claimedInput
     disconnect?: userWhereInput | boolean
     delete?: userWhereInput | boolean
     connect?: userWhereUniqueInput
-    update?: XOR<XOR<userUpdateToOneWithWhereWithoutDrop_requestsInput, userUpdateWithoutDrop_requestsInput>, userUncheckedUpdateWithoutDrop_requestsInput>
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutDrop_requests_claimedInput, userUpdateWithoutDrop_requests_claimedInput>, userUncheckedUpdateWithoutDrop_requests_claimedInput>
   }
 
   export type userCreateNestedOneWithoutNotificationsInput = {
@@ -26017,17 +26156,47 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type drop_requestCreateWithoutRequested_byInput = {
+    id?: string
+    status?: string
+    expires_at: Date | string
+    created_at?: Date | string
+    shift: shiftCreateNestedOneWithoutDrop_requestsInput
+    claimed_by?: userCreateNestedOneWithoutDrop_requests_claimedInput
+  }
+
+  export type drop_requestUncheckedCreateWithoutRequested_byInput = {
+    id?: string
+    shift_id: string
+    status?: string
+    expires_at: Date | string
+    claimed_by_user_id?: string | null
+    created_at?: Date | string
+  }
+
+  export type drop_requestCreateOrConnectWithoutRequested_byInput = {
+    where: drop_requestWhereUniqueInput
+    create: XOR<drop_requestCreateWithoutRequested_byInput, drop_requestUncheckedCreateWithoutRequested_byInput>
+  }
+
+  export type drop_requestCreateManyRequested_byInputEnvelope = {
+    data: drop_requestCreateManyRequested_byInput | drop_requestCreateManyRequested_byInput[]
+    skipDuplicates?: boolean
+  }
+
   export type drop_requestCreateWithoutClaimed_byInput = {
     id?: string
     status?: string
     expires_at: Date | string
     created_at?: Date | string
     shift: shiftCreateNestedOneWithoutDrop_requestsInput
+    requested_by: userCreateNestedOneWithoutDrop_requests_madeInput
   }
 
   export type drop_requestUncheckedCreateWithoutClaimed_byInput = {
     id?: string
     shift_id: string
+    requested_by_user_id: string
     status?: string
     expires_at: Date | string
     created_at?: Date | string
@@ -26392,6 +26561,35 @@ export namespace Prisma {
     data: XOR<swap_requestUpdateManyMutationInput, swap_requestUncheckedUpdateManyWithoutTargetInput>
   }
 
+  export type drop_requestUpsertWithWhereUniqueWithoutRequested_byInput = {
+    where: drop_requestWhereUniqueInput
+    update: XOR<drop_requestUpdateWithoutRequested_byInput, drop_requestUncheckedUpdateWithoutRequested_byInput>
+    create: XOR<drop_requestCreateWithoutRequested_byInput, drop_requestUncheckedCreateWithoutRequested_byInput>
+  }
+
+  export type drop_requestUpdateWithWhereUniqueWithoutRequested_byInput = {
+    where: drop_requestWhereUniqueInput
+    data: XOR<drop_requestUpdateWithoutRequested_byInput, drop_requestUncheckedUpdateWithoutRequested_byInput>
+  }
+
+  export type drop_requestUpdateManyWithWhereWithoutRequested_byInput = {
+    where: drop_requestScalarWhereInput
+    data: XOR<drop_requestUpdateManyMutationInput, drop_requestUncheckedUpdateManyWithoutRequested_byInput>
+  }
+
+  export type drop_requestScalarWhereInput = {
+    AND?: drop_requestScalarWhereInput | drop_requestScalarWhereInput[]
+    OR?: drop_requestScalarWhereInput[]
+    NOT?: drop_requestScalarWhereInput | drop_requestScalarWhereInput[]
+    id?: StringFilter<"drop_request"> | string
+    shift_id?: StringFilter<"drop_request"> | string
+    requested_by_user_id?: StringFilter<"drop_request"> | string
+    status?: StringFilter<"drop_request"> | string
+    expires_at?: DateTimeFilter<"drop_request"> | Date | string
+    claimed_by_user_id?: StringNullableFilter<"drop_request"> | string | null
+    created_at?: DateTimeFilter<"drop_request"> | Date | string
+  }
+
   export type drop_requestUpsertWithWhereUniqueWithoutClaimed_byInput = {
     where: drop_requestWhereUniqueInput
     update: XOR<drop_requestUpdateWithoutClaimed_byInput, drop_requestUncheckedUpdateWithoutClaimed_byInput>
@@ -26406,18 +26604,6 @@ export namespace Prisma {
   export type drop_requestUpdateManyWithWhereWithoutClaimed_byInput = {
     where: drop_requestScalarWhereInput
     data: XOR<drop_requestUpdateManyMutationInput, drop_requestUncheckedUpdateManyWithoutClaimed_byInput>
-  }
-
-  export type drop_requestScalarWhereInput = {
-    AND?: drop_requestScalarWhereInput | drop_requestScalarWhereInput[]
-    OR?: drop_requestScalarWhereInput[]
-    NOT?: drop_requestScalarWhereInput | drop_requestScalarWhereInput[]
-    id?: StringFilter<"drop_request"> | string
-    shift_id?: StringFilter<"drop_request"> | string
-    status?: StringFilter<"drop_request"> | string
-    expires_at?: DateTimeFilter<"drop_request"> | Date | string
-    claimed_by_user_id?: StringNullableFilter<"drop_request"> | string | null
-    created_at?: DateTimeFilter<"drop_request"> | Date | string
   }
 
   export type notificationUpsertWithWhereUniqueWithoutUserInput = {
@@ -26526,7 +26712,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -26555,7 +26742,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -26600,7 +26788,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -26629,7 +26818,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -26658,7 +26848,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -26687,7 +26878,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -26732,7 +26924,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -26761,7 +26954,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -27026,7 +27220,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -27055,7 +27250,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -27146,7 +27342,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -27175,7 +27372,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -27262,7 +27460,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -27291,7 +27490,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -27336,7 +27536,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -27365,7 +27566,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -27394,7 +27596,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -27423,7 +27626,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -27468,7 +27672,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -27497,7 +27702,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -27572,7 +27778,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentCreateNestedManyWithoutAssignerInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -27601,7 +27808,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUncheckedCreateNestedManyWithoutAssignerInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -27671,11 +27879,13 @@ export namespace Prisma {
     status?: string
     expires_at: Date | string
     created_at?: Date | string
-    claimed_by?: userCreateNestedOneWithoutDrop_requestsInput
+    requested_by: userCreateNestedOneWithoutDrop_requests_madeInput
+    claimed_by?: userCreateNestedOneWithoutDrop_requests_claimedInput
   }
 
   export type drop_requestUncheckedCreateWithoutShiftInput = {
     id?: string
+    requested_by_user_id: string
     status?: string
     expires_at: Date | string
     claimed_by_user_id?: string | null
@@ -27784,7 +27994,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUpdateManyWithoutAssignerNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -27813,7 +28024,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUncheckedUpdateManyWithoutAssignerNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -27929,7 +28141,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -27958,7 +28171,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -27992,7 +28206,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -28021,7 +28236,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -28111,7 +28327,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -28140,7 +28357,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -28180,7 +28398,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -28209,7 +28428,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -28277,7 +28497,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentCreateNestedManyWithoutAssignerInput
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -28306,7 +28527,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUncheckedCreateNestedManyWithoutAssignerInput
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -28340,7 +28562,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentCreateNestedManyWithoutAssignerInput
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
@@ -28369,7 +28592,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUncheckedCreateNestedManyWithoutAssignerInput
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
@@ -28459,7 +28683,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUpdateManyWithoutAssignerNestedInput
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -28488,7 +28713,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUncheckedUpdateManyWithoutAssignerNestedInput
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -28528,7 +28754,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUpdateManyWithoutAssignerNestedInput
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
@@ -28557,7 +28784,8 @@ export namespace Prisma {
     assignments_made?: shift_assignmentUncheckedUpdateManyWithoutAssignerNestedInput
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -28602,7 +28830,7 @@ export namespace Prisma {
     create: XOR<shiftCreateWithoutDrop_requestsInput, shiftUncheckedCreateWithoutDrop_requestsInput>
   }
 
-  export type userCreateWithoutDrop_requestsInput = {
+  export type userCreateWithoutDrop_requests_madeInput = {
     id: string
     name: string
     email: string
@@ -28626,12 +28854,13 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
   }
 
-  export type userUncheckedCreateWithoutDrop_requestsInput = {
+  export type userUncheckedCreateWithoutDrop_requests_madeInput = {
     id: string
     name: string
     email: string
@@ -28655,14 +28884,80 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
   }
 
-  export type userCreateOrConnectWithoutDrop_requestsInput = {
+  export type userCreateOrConnectWithoutDrop_requests_madeInput = {
     where: userWhereUniqueInput
-    create: XOR<userCreateWithoutDrop_requestsInput, userUncheckedCreateWithoutDrop_requestsInput>
+    create: XOR<userCreateWithoutDrop_requests_madeInput, userUncheckedCreateWithoutDrop_requests_madeInput>
+  }
+
+  export type userCreateWithoutDrop_requests_claimedInput = {
+    id: string
+    name: string
+    email: string
+    email_verified?: boolean
+    image?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    role?: string
+    banned?: boolean
+    ban_reason?: string | null
+    ban_expires?: Date | string | null
+    timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    sessions?: sessionCreateNestedManyWithoutUserInput
+    accounts?: accountCreateNestedManyWithoutUserInput
+    certifications?: certificationCreateNestedManyWithoutUserInput
+    availability?: availabilityCreateNestedManyWithoutUserInput
+    availability_exceptions?: availability_exceptionCreateNestedManyWithoutUserInput
+    shift_assignments?: shift_assignmentCreateNestedManyWithoutAssignedInput
+    assignments_made?: shift_assignmentCreateNestedManyWithoutAssignerInput
+    created_shifts?: shiftCreateNestedManyWithoutCreatorInput
+    swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
+    swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    notifications?: notificationCreateNestedManyWithoutUserInput
+    audit_logs?: audit_logCreateNestedManyWithoutUserInput
+    manager_locations?: manager_locationCreateNestedManyWithoutUserInput
+  }
+
+  export type userUncheckedCreateWithoutDrop_requests_claimedInput = {
+    id: string
+    name: string
+    email: string
+    email_verified?: boolean
+    image?: string | null
+    created_at?: Date | string
+    updated_at?: Date | string
+    role?: string
+    banned?: boolean
+    ban_reason?: string | null
+    ban_expires?: Date | string | null
+    timezone?: string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    sessions?: sessionUncheckedCreateNestedManyWithoutUserInput
+    accounts?: accountUncheckedCreateNestedManyWithoutUserInput
+    certifications?: certificationUncheckedCreateNestedManyWithoutUserInput
+    availability?: availabilityUncheckedCreateNestedManyWithoutUserInput
+    availability_exceptions?: availability_exceptionUncheckedCreateNestedManyWithoutUserInput
+    shift_assignments?: shift_assignmentUncheckedCreateNestedManyWithoutAssignedInput
+    assignments_made?: shift_assignmentUncheckedCreateNestedManyWithoutAssignerInput
+    created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
+    swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
+    swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
+    audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
+    manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type userCreateOrConnectWithoutDrop_requests_claimedInput = {
+    where: userWhereUniqueInput
+    create: XOR<userCreateWithoutDrop_requests_claimedInput, userUncheckedCreateWithoutDrop_requests_claimedInput>
   }
 
   export type shiftUpsertWithoutDrop_requestsInput = {
@@ -28710,18 +29005,18 @@ export namespace Prisma {
     swap_requests?: swap_requestUncheckedUpdateManyWithoutShiftNestedInput
   }
 
-  export type userUpsertWithoutDrop_requestsInput = {
-    update: XOR<userUpdateWithoutDrop_requestsInput, userUncheckedUpdateWithoutDrop_requestsInput>
-    create: XOR<userCreateWithoutDrop_requestsInput, userUncheckedCreateWithoutDrop_requestsInput>
+  export type userUpsertWithoutDrop_requests_madeInput = {
+    update: XOR<userUpdateWithoutDrop_requests_madeInput, userUncheckedUpdateWithoutDrop_requests_madeInput>
+    create: XOR<userCreateWithoutDrop_requests_madeInput, userUncheckedCreateWithoutDrop_requests_madeInput>
     where?: userWhereInput
   }
 
-  export type userUpdateToOneWithWhereWithoutDrop_requestsInput = {
+  export type userUpdateToOneWithWhereWithoutDrop_requests_madeInput = {
     where?: userWhereInput
-    data: XOR<userUpdateWithoutDrop_requestsInput, userUncheckedUpdateWithoutDrop_requestsInput>
+    data: XOR<userUpdateWithoutDrop_requests_madeInput, userUncheckedUpdateWithoutDrop_requests_madeInput>
   }
 
-  export type userUpdateWithoutDrop_requestsInput = {
+  export type userUpdateWithoutDrop_requests_madeInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -28745,12 +29040,13 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
   }
 
-  export type userUncheckedUpdateWithoutDrop_requestsInput = {
+  export type userUncheckedUpdateWithoutDrop_requests_madeInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -28774,6 +29070,78 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
+    audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
+    manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type userUpsertWithoutDrop_requests_claimedInput = {
+    update: XOR<userUpdateWithoutDrop_requests_claimedInput, userUncheckedUpdateWithoutDrop_requests_claimedInput>
+    create: XOR<userCreateWithoutDrop_requests_claimedInput, userUncheckedCreateWithoutDrop_requests_claimedInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutDrop_requests_claimedInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutDrop_requests_claimedInput, userUncheckedUpdateWithoutDrop_requests_claimedInput>
+  }
+
+  export type userUpdateWithoutDrop_requests_claimedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    email_verified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
+    banned?: BoolFieldUpdateOperationsInput | boolean
+    ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
+    ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    sessions?: sessionUpdateManyWithoutUserNestedInput
+    accounts?: accountUpdateManyWithoutUserNestedInput
+    certifications?: certificationUpdateManyWithoutUserNestedInput
+    availability?: availabilityUpdateManyWithoutUserNestedInput
+    availability_exceptions?: availability_exceptionUpdateManyWithoutUserNestedInput
+    shift_assignments?: shift_assignmentUpdateManyWithoutAssignedNestedInput
+    assignments_made?: shift_assignmentUpdateManyWithoutAssignerNestedInput
+    created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
+    swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
+    swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    notifications?: notificationUpdateManyWithoutUserNestedInput
+    audit_logs?: audit_logUpdateManyWithoutUserNestedInput
+    manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutDrop_requests_claimedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    email_verified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: StringFieldUpdateOperationsInput | string
+    banned?: BoolFieldUpdateOperationsInput | boolean
+    ban_reason?: NullableStringFieldUpdateOperationsInput | string | null
+    ban_expires?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timezone?: StringFieldUpdateOperationsInput | string
+    preferences?: NullableJsonNullValueInput | InputJsonValue
+    sessions?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: accountUncheckedUpdateManyWithoutUserNestedInput
+    certifications?: certificationUncheckedUpdateManyWithoutUserNestedInput
+    availability?: availabilityUncheckedUpdateManyWithoutUserNestedInput
+    availability_exceptions?: availability_exceptionUncheckedUpdateManyWithoutUserNestedInput
+    shift_assignments?: shift_assignmentUncheckedUpdateManyWithoutAssignedNestedInput
+    assignments_made?: shift_assignmentUncheckedUpdateManyWithoutAssignerNestedInput
+    created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
+    swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
+    swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
@@ -28803,7 +29171,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
   }
@@ -28832,7 +29201,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
   }
@@ -28877,7 +29247,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
   }
@@ -28906,7 +29277,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -28935,7 +29307,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationCreateNestedManyWithoutUserInput
   }
@@ -28964,7 +29337,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     manager_locations?: manager_locationUncheckedCreateNestedManyWithoutUserInput
   }
@@ -29009,7 +29383,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUpdateManyWithoutUserNestedInput
   }
@@ -29038,7 +29413,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     manager_locations?: manager_locationUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -29067,7 +29443,8 @@ export namespace Prisma {
     created_shifts?: shiftCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationCreateNestedManyWithoutUserInput
     audit_logs?: audit_logCreateNestedManyWithoutUserInput
   }
@@ -29096,7 +29473,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedCreateNestedManyWithoutCreatorInput
     swap_requests_made?: swap_requestUncheckedCreateNestedManyWithoutRequesterInput
     swap_requests_received?: swap_requestUncheckedCreateNestedManyWithoutTargetInput
-    drop_requests?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
+    drop_requests_made?: drop_requestUncheckedCreateNestedManyWithoutRequested_byInput
+    drop_requests_claimed?: drop_requestUncheckedCreateNestedManyWithoutClaimed_byInput
     notifications?: notificationUncheckedCreateNestedManyWithoutUserInput
     audit_logs?: audit_logUncheckedCreateNestedManyWithoutUserInput
   }
@@ -29168,7 +29546,8 @@ export namespace Prisma {
     created_shifts?: shiftUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUpdateManyWithoutUserNestedInput
   }
@@ -29197,7 +29576,8 @@ export namespace Prisma {
     created_shifts?: shiftUncheckedUpdateManyWithoutCreatorNestedInput
     swap_requests_made?: swap_requestUncheckedUpdateManyWithoutRequesterNestedInput
     swap_requests_received?: swap_requestUncheckedUpdateManyWithoutTargetNestedInput
-    drop_requests?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
+    drop_requests_made?: drop_requestUncheckedUpdateManyWithoutRequested_byNestedInput
+    drop_requests_claimed?: drop_requestUncheckedUpdateManyWithoutClaimed_byNestedInput
     notifications?: notificationUncheckedUpdateManyWithoutUserNestedInput
     audit_logs?: audit_logUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -29333,9 +29713,19 @@ export namespace Prisma {
     updated_at?: Date | string
   }
 
+  export type drop_requestCreateManyRequested_byInput = {
+    id?: string
+    shift_id: string
+    status?: string
+    expires_at: Date | string
+    claimed_by_user_id?: string | null
+    created_at?: Date | string
+  }
+
   export type drop_requestCreateManyClaimed_byInput = {
     id?: string
     shift_id: string
+    requested_by_user_id: string
     status?: string
     expires_at: Date | string
     created_at?: Date | string
@@ -29664,17 +30054,46 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type drop_requestUpdateWithoutRequested_byInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    shift?: shiftUpdateOneRequiredWithoutDrop_requestsNestedInput
+    claimed_by?: userUpdateOneWithoutDrop_requests_claimedNestedInput
+  }
+
+  export type drop_requestUncheckedUpdateWithoutRequested_byInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shift_id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    claimed_by_user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type drop_requestUncheckedUpdateManyWithoutRequested_byInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shift_id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    claimed_by_user_id?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type drop_requestUpdateWithoutClaimed_byInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     shift?: shiftUpdateOneRequiredWithoutDrop_requestsNestedInput
+    requested_by?: userUpdateOneRequiredWithoutDrop_requests_madeNestedInput
   }
 
   export type drop_requestUncheckedUpdateWithoutClaimed_byInput = {
     id?: StringFieldUpdateOperationsInput | string
     shift_id?: StringFieldUpdateOperationsInput | string
+    requested_by_user_id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29683,6 +30102,7 @@ export namespace Prisma {
   export type drop_requestUncheckedUpdateManyWithoutClaimed_byInput = {
     id?: StringFieldUpdateOperationsInput | string
     shift_id?: StringFieldUpdateOperationsInput | string
+    requested_by_user_id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29976,6 +30396,7 @@ export namespace Prisma {
 
   export type drop_requestCreateManyShiftInput = {
     id?: string
+    requested_by_user_id: string
     status?: string
     expires_at: Date | string
     claimed_by_user_id?: string | null
@@ -30038,11 +30459,13 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
-    claimed_by?: userUpdateOneWithoutDrop_requestsNestedInput
+    requested_by?: userUpdateOneRequiredWithoutDrop_requests_madeNestedInput
+    claimed_by?: userUpdateOneWithoutDrop_requests_claimedNestedInput
   }
 
   export type drop_requestUncheckedUpdateWithoutShiftInput = {
     id?: StringFieldUpdateOperationsInput | string
+    requested_by_user_id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     claimed_by_user_id?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30051,6 +30474,7 @@ export namespace Prisma {
 
   export type drop_requestUncheckedUpdateManyWithoutShiftInput = {
     id?: StringFieldUpdateOperationsInput | string
+    requested_by_user_id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     expires_at?: DateTimeFieldUpdateOperationsInput | Date | string
     claimed_by_user_id?: NullableStringFieldUpdateOperationsInput | string | null

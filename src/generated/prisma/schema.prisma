@@ -32,7 +32,8 @@ model user {
   created_shifts          shift[]
   swap_requests_made      swap_request[]           @relation("swap_requester")
   swap_requests_received  swap_request[]           @relation("swap_target")
-  drop_requests           drop_request[]
+  drop_requests_made      drop_request[]           @relation("DropRequestRequester")
+  drop_requests_claimed   drop_request[]           @relation("DropRequestClaimer")
   notifications           notification[]
   audit_logs              audit_log[]
   manager_locations       manager_location[]
@@ -213,15 +214,17 @@ model swap_request {
 }
 
 model drop_request {
-  id                 String   @id @default(cuid())
-  shift_id           String
-  status             String   @default("OPEN")
-  expires_at         DateTime
-  claimed_by_user_id String?
-  created_at         DateTime @default(now())
+  id                   String   @id @default(cuid())
+  shift_id             String
+  requested_by_user_id String
+  status               String   @default("OPEN")
+  expires_at           DateTime
+  claimed_by_user_id   String?
+  created_at           DateTime @default(now())
 
-  shift      shift @relation(fields: [shift_id], references: [id])
-  claimed_by user? @relation(fields: [claimed_by_user_id], references: [id])
+  shift        shift @relation(fields: [shift_id], references: [id])
+  requested_by user  @relation("DropRequestRequester", fields: [requested_by_user_id], references: [id])
+  claimed_by   user? @relation("DropRequestClaimer", fields: [claimed_by_user_id], references: [id])
 
   @@map("drop_request")
 }

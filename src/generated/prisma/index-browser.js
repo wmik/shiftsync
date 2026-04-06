@@ -252,6 +252,7 @@ exports.Prisma.Swap_requestScalarFieldEnum = {
 exports.Prisma.Drop_requestScalarFieldEnum = {
   id: 'id',
   shift_id: 'shift_id',
+  requested_by_user_id: 'requested_by_user_id',
   status: 'status',
   expires_at: 'expires_at',
   claimed_by_user_id: 'claimed_by_user_id',
