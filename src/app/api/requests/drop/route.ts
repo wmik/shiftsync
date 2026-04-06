@@ -55,6 +55,9 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        requested_by: {
+          select: { id: true, name: true, email: true },
+        },
         claimed_by: {
           select: { id: true, name: true, email: true },
         },
@@ -117,13 +120,14 @@ export async function POST(request: NextRequest) {
 
     const pendingCount = await prisma.drop_request.count({
       where: {
-        status: "OPEN",
+        requested_by_user_id: session.user.id,
+        status: { in: ["OPEN", "CLAIMED"] },
       },
     });
 
-    if (pendingCount >= 10) {
+    if (pendingCount >= 3) {
       return NextResponse.json(
-        { error: "Too many open drop requests" },
+        { error: "Maximum 3 pending drop requests allowed" },
         { status: 400 }
       );
     }
@@ -134,6 +138,7 @@ export async function POST(request: NextRequest) {
     const dropRequest = await prisma.drop_request.create({
       data: {
         shift_id: shiftId,
+        requested_by_user_id: session.user.id,
         status: "OPEN",
         expires_at: expiresAt,
       },

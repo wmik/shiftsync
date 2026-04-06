@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     const pendingCount = await prisma.swap_request.count({
       where: {
         requester_user_id: session.user.id,
-        status: "PENDING",
+        status: { in: ["PENDING", "PENDING_APPROVAL"] },
       },
     });
 
