@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { validateAssignment, suggestAlternatives } from "@/lib/constraints";
 import { createAuditLog } from "@/lib/audit";
+import { emitConflictEvent } from "@/lib/conflict-events";
 
 export async function POST(
   request: NextRequest,
@@ -30,6 +31,9 @@ export async function POST(
         skill: true,
         assignments: {
           where: { status: "CONFIRMED" },
+          include: {
+            assigned: { select: { id: true, name: true } },
+          },
         },
       },
     });
@@ -42,6 +46,17 @@ export async function POST(
       const clientTimestamp = new Date(shiftUpdatedAt).getTime();
       const serverTimestamp = shift.updated_at.getTime();
       if (serverTimestamp > clientTimestamp) {
+        emitConflictEvent({
+          type: "ASSIGNMENT_CONFLICT",
+          shiftId: id,
+          locationId: shift.location_id,
+          attemptedUserId: session.user.id,
+          attemptedUserName: session.user.name || undefined,
+          conflictingUserId: shift.assignments[0]?.assigned?.id || "",
+          conflictingUserName: shift.assignments[0]?.assigned?.name || undefined,
+          timestamp: new Date().toISOString(),
+        });
+
         return NextResponse.json(
           {
             error: "CONFLICT",

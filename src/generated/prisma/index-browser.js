@@ -133,7 +133,9 @@ exports.Prisma.UserScalarFieldEnum = {
   ban_reason: 'ban_reason',
   ban_expires: 'ban_expires',
   timezone: 'timezone',
-  preferences: 'preferences'
+  preferences: 'preferences',
+  desired_hours_min: 'desired_hours_min',
+  desired_hours_max: 'desired_hours_max'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {

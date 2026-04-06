@@ -22,6 +22,8 @@ model user {
   ban_expires    DateTime?
   timezone       String    @default("America/New_York")
   preferences    Json?     @default("{ \"emailNotifications\": true }")
+  desired_hours_min Int?    @default(20)
+  desired_hours_max Int?    @default(40)
 
   sessions                session[]
   accounts                account[]

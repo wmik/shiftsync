@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { addNotificationListener } from "@/lib/notification-events";
+import { addConflictListener, type ConflictEvent } from "@/lib/conflict-events";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,6 +48,17 @@ export async function GET(request: NextRequest) {
 
       const unsubscribe = addNotificationListener(handleNotification);
 
+      const handleConflict = (event: ConflictEvent) => {
+        const message = `event: conflict\ndata: ${JSON.stringify(event)}\n\n`;
+        try {
+          controller.enqueue(encoder.encode(message));
+        } catch (error) {
+          console.error("Failed to send conflict event:", error);
+        }
+      };
+
+      const unsubscribeConflict = addConflictListener(handleConflict);
+
       sendEvent("connected", { userId, timestamp: new Date().toISOString() });
 
       const interval = setInterval(async () => {
@@ -72,6 +84,7 @@ export async function GET(request: NextRequest) {
       request.signal.addEventListener("abort", () => {
         clearInterval(interval);
         unsubscribe();
+        unsubscribeConflict();
         clients.delete(clientId);
         controller.close();
       });
