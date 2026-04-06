@@ -53,6 +53,7 @@ interface DropRequest {
   expires_at: string;
   created_at: string;
   shift: Shift;
+  requested_by: UserBrief;
   claimed_by: UserBrief | null;
 }
 
@@ -208,7 +209,7 @@ export default function RequestsPage() {
     (r) => r.requester.id === userId || r.target.id === userId
   );
   const myDropRequests = dropRequests.filter(
-    (r) => r.claimed_by?.id === userId
+    (r) => r.requested_by.id === userId
   );
   const openDropRequests = dropRequests.filter((r) => r.status === "OPEN");
 
@@ -575,6 +576,14 @@ export default function RequestsPage() {
                               </div>
                               <div className="flex items-center gap-2 text-sm mt-1">
                                 <Badge variant="outline">{request.shift.skill.name}</Badge>
+                              </div>
+                              <div className="flex items-center gap-1 text-sm mt-1">
+                                <User className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-muted-foreground">From:</span>
+                                <span>{request.requested_by.name}</span>
+                                {request.requested_by.id === session.data?.user?.id && (
+                                  <Badge variant="outline" className="ml-1">You</Badge>
+                                )}
                               </div>
                             </div>
                           </div>
