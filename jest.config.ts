@@ -3,7 +3,10 @@ export default {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/__tests__'],
-  testMatch: ['**/__tests__/unit/**/*.test.ts'],
+  testMatch: [
+    '**/__tests__/unit/**/*.test.ts',
+    '**/__tests__/integration/**/*.test.ts',
+  ],
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
@@ -14,7 +17,6 @@ export default {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@/generated/prisma/client$': '<rootDir>/__tests__/__mocks__/prisma.ts',
     '^@/lib/db$': '<rootDir>/__tests__/__mocks__/db.ts',
   },
   setupFilesAfterEnv: ['<rootDir>/__tests__/helpers/setup-jest.ts'],
